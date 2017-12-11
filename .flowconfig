@@ -1,0 +1,29 @@
+[ignore]
+.*/node_modules/.*
+<PROJECT_ROOT>/dist/.*
+<PROJECT_ROOT>/coverage/.*
+<PROJECT_ROOT>/rollup.config.js
+<PROJECT_ROOT>/karma.conf.js
+
+[libs]
+declarations/
+
+[lints]
+all=error
+
+[options]
+all=true
+module.use_strict=true
+munge_underscores=true
+include_warnings=true
+unsafe.enable_getters_and_setters=true
+
+module.name_mapper.extension='vert' -> 'ShaderStub'
+module.name_mapper.extension='frag' -> 'ShaderStub'
+# Flow#1068
+module.system=haste
+
+suppress_comment= \\(.\\|\n\\)*\\$FlowFixMe
+suppress_comment= \\(.\\|\n\\)*\\$FlowIssue
+suppress_type=$FlowFixMe
+suppress_type=$FlowIssue

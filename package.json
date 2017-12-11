@@ -1,0 +1,36 @@
+{
+    "name": "gravi",
+    "version": "0.0.0",
+    "main": "dist/gravi.cjs.js",
+    "module": "dist/gravi.esm.js",
+    "browser": "dist/gravi.umd.js",
+    "files": [
+        "dist"
+    ],
+    "devDependencies": {
+        "@babel/core": "^7.0.0-beta.34",
+        "@babel/preset-env": "^7.0.0-beta.34",
+        "@babel/preset-flow": "^7.0.0-beta.34",
+        "flow-bin": "^0.61.0",
+        "jasmine-core": "^2.8.0",
+        "karma": "^1.7.1",
+        "karma-chrome-launcher": "^2.2.0",
+        "karma-coverage": "^1.1.1",
+        "karma-firefox-launcher": "^1.1.0",
+        "karma-jasmine": "^1.1.1",
+        "rollup": "^0.52.1",
+        "rollup-plugin-babel": "^4.0.0-beta.0",
+        "rollup-plugin-commonjs": "^8.2.6",
+        "rollup-plugin-glsl": "^1.1.0",
+        "rollup-plugin-istanbul": "^2.0.0",
+        "rollup-plugin-node-resolve": "^3.0.0",
+        "rollup-plugin-uglify": "^2.0.1",
+        "tape": "^4.8.0"
+    },
+    "scripts": {
+        "prepare": "TARGET=prod rollup -c",
+        "test": "flow && TARGET=test rollup -c && karma start",
+        "coverage": "TARGET=cov rollup -c && karma start --reporters coverage",
+        "clean": "rm -rf dist/ coverage/"
+    }
+}
