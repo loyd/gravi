@@ -10,8 +10,6 @@
     "devDependencies": {
         "@babel/core": "^7.0.0-beta.34",
         "@babel/preset-env": "^7.0.0-beta.34",
-        "@babel/preset-flow": "^7.0.0-beta.34",
-        "flow-bin": "^0.61.0",
         "jasmine-core": "^2.8.0",
         "karma": "^1.7.1",
         "karma-chrome-launcher": "^2.2.0",
@@ -24,12 +22,11 @@
         "rollup-plugin-glslify": "^1.0.1",
         "rollup-plugin-istanbul": "^2.0.0",
         "rollup-plugin-node-resolve": "^3.0.0",
-        "rollup-plugin-uglify": "^2.0.1",
-        "tape": "^4.8.0"
+        "rollup-plugin-uglify": "^2.0.1"
     },
     "scripts": {
         "prepare": "TARGET=prod rollup -c",
-        "test": "flow && TARGET=test rollup -c && karma start",
+        "test": "TARGET=test rollup -c && karma start",
         "coverage": "TARGET=cov rollup -c && karma start --reporters coverage",
         "clean": "rm -rf dist/ coverage/"
     }
