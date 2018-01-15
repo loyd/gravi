@@ -7,7 +7,7 @@ module.exports = config => config.set({
 
     reporters: ['dots'],
 
-    browsers: ['ChromiumHeadless', 'FirefoxHeadless'],
+    browsers: ['Chromium', 'Firefox'],
 
     coverageReporter: {
         reporters: [
