@@ -77,12 +77,15 @@ describe('findBounds step', () => {
         test(generateRandomLst(2018 * 2), 2, 6);
         test(generateRandomLst(2018 * 4), 4, 6);
     });
+
+    // TODO: test resizing.
+    // TODO: test rotation of input buffers.
 });
 
 function test(lst, itemSize, expectedStepCount) {
     const app = createApp();
     const items = createVbo(app, lst, itemSize);
-    const result = createFloatTexture(app, 1, 1);
+    const result = createFloatTexture(app, 1, 1, 4);
 
     const stepCount = findBounds(app)(items, result);
 

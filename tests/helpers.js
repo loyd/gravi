@@ -5,13 +5,17 @@ export function createApp() {
     return PicoGL.createApp(canvas);
 }
 
-export function createFloatTexture(app, width, height) {
+export function createFloatTexture(app, width, height, itemSize) {
     app.floatRenderTargets();
-    expect(app.floatRenderTargetsEnabled).toBeTruthy();
+
+    const [format, internalFormat] = itemSize === 4 ? [PicoGL.RGBA, PicoGL.RGBA32F]
+                                   : itemSize === 3 ? [PicoGL.RGB, PicoGL.RGB32F]
+                                   : null;
 
     return app.createTexture2D(width, height, {
         type: PicoGL.FLOAT,
-        internalFormat: PicoGL.FLOAT32F,
+        format,
+        internalFormat,
     });
 }
 

@@ -7,7 +7,7 @@ import reduceVert from './reduce.vert';
 import storeFrag from './store.frag';
 
 function createVao(app, data, pattern = data.itemSize) {
-    invariant(PicoGL.FLOAT === PicoGL.FLOAT);
+    invariant(data.type === PicoGL.FLOAT);
     invariant(data.itemSize >= 2);
 
     const {gl} = app;
@@ -80,6 +80,8 @@ class Kit {
 }
 
 export default function (app) {
+    invariant(app.floatRenderTargetsEnabled);
+
     const mark = Symbol();
 
     const introProg = app.createProgram(introVert, storeFrag, ['result']);
@@ -104,6 +106,9 @@ export default function (app) {
         let resultFb = result[mark];
 
         if (!resultFb) {
+            invariant(result.type === PicoGL.FLOAT);
+            invariant(result.format === PicoGL.RGBA);
+
             resultFb = result[mark] = app.createFramebuffer().colorTarget(0, result);
         }
 
@@ -128,9 +133,10 @@ export default function (app) {
             activeKit = nextKit;
         }
 
-        app.rasterize();
-        app.drawFramebuffer(resultFb);
-        app.viewport(0, 0, 1, 1);
+        app
+            .rasterize()
+            .drawFramebuffer(resultFb)
+            .viewport(0, 0, 1, 1);
 
         activeKit.draw(1);
 
