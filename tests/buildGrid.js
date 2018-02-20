@@ -22,6 +22,24 @@ describe('buildGrid step', () => {
         ]);
     });
 
+    it('should mix particles together with scalene grids', () => {
+        test([
+            -2, -2, .5,
+            -2, 2, .5,
+            -1, -1, 2,
+            -1, 1, .5,
+            0, 0, 1,
+            1, 1, 2,
+            1, -1, .5,
+            2, 2, .5,
+            2, -2, .5,
+        ], [-9, -15, 9, 15], [
+            0,0,0,0, 0,0,0,0, 0,0,0,0,
+            0,0,0,0, 0,0,8,60,0,0,0,0,
+            0,0,0,0, 0,0,0,0, 0,0,0,0,
+        ]);
+    });
+
     it('should handle evenly distributed particles', () => {
         test([
             -5, -2, .5,
