@@ -1,7 +1,7 @@
 import PicoGL from 'picogl';
 
 import buildGrid from '../src/buildGrid';
-import {createApp, createFloatTexture, readFromTexture} from './helpers';
+import {createApp, createFloatTexture, readFromTexture, round} from './helpers';
 
 describe('buildGrid step', () => {
     it('should mix particles together', () => {
@@ -17,7 +17,7 @@ describe('buildGrid step', () => {
             2, -2, .5,
         ], [-9, -9, 9, 9], [
             0,0,0,0, 0,0,0,0, 0,0,0,0,
-            0,0,0,0, 0,0,8,9, 0,0,0,0,
+            0,0,0,0, 0,0,8,36,0,0,0,0,
             0,0,0,0, 0,0,0,0, 0,0,0,0,
         ]);
     });
@@ -34,9 +34,9 @@ describe('buildGrid step', () => {
             4, -9, .5,
             3, -2, .5,
         ], [-9, -9, 9, 9], [
-            0,0,0,0, 0,0,0,0, 2,-4.5,0.5,1,
-            -5.5,0,1,2, -2,-2,3,2, 6,-2,1,2,
-            -2.5,2.5,0.5,1, 0,0,0,0, 10,8,2,1,
+            0,0,0,0, 0,0,0,0, 2,-4.5,0.5,36,
+            -5.5,0,1,36, -2,-2,3,36, 6,-2,1,36,
+            -2.5,2.5,0.5,36, 0,0,0,0, 10,8,2,36,
         ]);
     });
 
@@ -63,32 +63,29 @@ function test(data, bounds, expected, size = 3) {
     buildGrid(app)(positionsBuf, massesBuf, boundsTex, result);
 
     expect(app.gl.getError()).toBe(0);
-    expect(readFromTexture(app, result)).toEqual(expected);
 
-    const p = readFromTexture(app, result);
-    if (p.join() !== expected.join()) {
-        for (let i = 0; i < result.height; ++i) {
-            const r = p.slice(i*4*result.width, (i+1)*4*result.width);
-            console.log(r);
-        }
-    }
+    const actual = readFromTexture(app, result);
+
+    expect(actual.map(round)).toEqual(expected.map(round));
 }
 
 function testMarginals(n) {
     const expected = Array.from(Array(4 * n * n), _ => 0);
 
-    expected.splice(0, 4, -9, -9, 1, 1);
-    expected.splice(4*(n/2|0), 4, 0, -9, 1, 1);
-    expected.splice(4*(n-1), 4, 9, -9, 1, 1);
+    const area = (18 / n)**2;
+
+    expected.splice(0, 4, -9, -9, 1, area);
+    expected.splice(4*(n/2|0), 4, 0, -9, 1, area);
+    expected.splice(4*(n-1), 4, 9, -9, 1, area);
 
     const mid = n * ((n-1)/2|0);
-    expected.splice(4*mid, 4, -9, 0, 1, 1);
-    expected.splice(4*(mid + n-1), 4, 9, 0, 1, 1);
+    expected.splice(4*mid, 4, -9, 0, 1, area);
+    expected.splice(4*(mid + n-1), 4, 9, 0, 1, area);
 
     const last = n * (n-1);
-    expected.splice(4*last, 4, -9, 9, 1, 1);
-    expected.splice(4*(last + n/2|0), 4, 0, 9, 1, 1);
-    expected.splice(4*(last + n-1), 4, 9, 9, 1, 1);
+    expected.splice(4*last, 4, -9, 9, 1, area);
+    expected.splice(4*(last + n/2|0), 4, 0, 9, 1, area);
+    expected.splice(4*(last + n-1), 4, 9, 9, 1, area);
 
     test([
         -9, -9, 1,

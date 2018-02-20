@@ -44,6 +44,8 @@ export default function (app) {
 
         // TODO: use an uniform buffer.
         call
+            .uniform('invShape', [1/result.width, 1/result.height])
+            // TODO: can we avoid borders?
             .uniform('border', [1 - 1/result.width, 1 - 1/result.height])
             .texture('bounds', bounds);
 
@@ -54,8 +56,8 @@ export default function (app) {
             .clearMask(PicoGL.COLOR_BUFFER_BIT)
             .clearColor(0, 0, 0, 0)
             .clear()
-            .blend()
-            .blendFunc(PicoGL.ONE, PicoGL.ONE);
+            .blendFuncSeparate(PicoGL.ONE, PicoGL.ONE, PicoGL.ONE, PicoGL.ZERO)
+            .blend();
 
         call.draw();
 
