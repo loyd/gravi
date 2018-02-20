@@ -50,7 +50,6 @@ export default function (app) {
             .texture('bounds', bounds);
 
         app
-            .rasterize()
             .drawFramebuffer(fb)
             .viewport(0, 0, result.width, result.height)
             .clearMask(PicoGL.COLOR_BUFFER_BIT)

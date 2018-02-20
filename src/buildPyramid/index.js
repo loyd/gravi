@@ -19,8 +19,6 @@ export default function (app) {
     const call = app.createDrawCall(prog, vao, PicoGL.TRIANGLE_STRIP);
 
     return (grid, result) => {
-        app.rasterize();    // TODO: skip extra calls.
-
         for (let i = 0; i < result.length; ++i) {
             const source = i === 0 ? grid : result[i-1];
             const target = result[i];
