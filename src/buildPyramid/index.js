@@ -1,6 +1,6 @@
 import PicoGL from 'picogl';
 
-import {invariant} from '../utils';
+import {invariant, isPowerOf2, isFloatTexture} from '../utils';
 
 import quadVert from './quad.vert';
 import reduceFrag from './reduce.frag';
@@ -10,6 +10,8 @@ const QUAD = new Float32Array([-1, 1, -1, -1, 1, 1, 1, -1]);
 export default function (app) {
     invariant(app.floatRenderTargetsEnabled);
 
+    const {gl} = app;
+
     const mark = Symbol();
 
     const prog = app.createProgram(quadVert, reduceFrag);
@@ -18,30 +20,55 @@ export default function (app) {
     const vao = app.createVertexArray().vertexAttributeBuffer(0, buf);
     const call = app.createDrawCall(prog, vao, PicoGL.TRIANGLE_STRIP);
 
+    const texOptions = {
+        type: PicoGL.FLOAT,
+        format: PicoGL.RGBA,
+        internalFormat: PicoGL.RGBA32F,
+    };
+
     return (grid, result) => {
-        for (let i = 0; i < result.length; ++i) {
-            const source = i === 0 ? grid : result[i-1];
-            const target = result[i];
+        invariant(grid.width === grid.height);
+        invariant(grid.width >= 8);
+        invariant(isPowerOf2(grid.width));
+        invariant(grid.width === result.width + 2);
+        invariant(grid.height === 2 * result.height);
+        invariant(isFloatTexture(grid, 4));
+        invariant(isFloatTexture(result, 4));
 
-            invariant(2 * target.width === source.width);
-            invariant(2 * target.height === source.height);
+        let interim = grid[mark];
 
-            let fb = target[mark];
+        if (!interim) {
+            const texA = app.createTexture2D(grid.width / 2, grid.height / 2, texOptions);
+            const texB = app.createTexture2D(grid.width / 4, grid.height / 4, texOptions);
 
-            if (!fb) {
-                invariant(target.type === PicoGL.FLOAT);
-                invariant(target.format === PicoGL.RGBA);
+            const fbA = app.createFramebuffer().colorTarget(0, texA);
+            const fbB = app.createFramebuffer().colorTarget(0, texB);
 
-                fb = target[mark] = app.createFramebuffer().colorTarget(0, target);
-            }
+            interim = grid[mark] = {texA, texB, fbA, fbB};
+        }
 
+        const {texA, texB, fbA, fbB} = interim;
+
+        // grid --> texA --> texB --> texA --> ..
+        let activeFb = fbA;
+        let activeTex = grid;
+
+        for (let size = grid.width / 2, offset = 0; size > 1; offset += size, size /= 2) {
             app
-                .drawFramebuffer(fb)
-                .viewport(0, 0, target.width, target.height);
+                .readFramebuffer(activeFb)
+                .drawFramebuffer(activeFb)
+                .viewport(0, 0, size, size);
 
             call
-                .texture('grid', source)
+                .texture('level', activeTex)
                 .draw();
+
+            // TODO: how much does copying cost?
+            gl.bindTexture(gl.TEXTURE_2D, result.texture);
+            gl.copyTexSubImage2D(gl.TEXTURE_2D, 0, offset, 0, 0, 0, size, size);
+
+            activeFb = activeFb === fbA ? fbB : fbA;
+            activeTex = activeTex === texA ? texB : texA;
         }
     };
 }

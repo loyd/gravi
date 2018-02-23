@@ -2,12 +2,15 @@ import PicoGL from 'picogl';
 
 export function createApp() {
     const canvas = document.createElement('canvas');
-    return PicoGL.createApp(canvas);
+
+    const app = PicoGL.createApp(canvas);
+
+    app.floatRenderTargets();
+
+    return app;
 }
 
 export function createFloatTexture(app, width, height, itemSize) {
-    app.floatRenderTargets();
-
     const [format, internalFormat] = itemSize === 4 ? [PicoGL.RGBA, PicoGL.RGBA32F]
                                    : itemSize === 3 ? [PicoGL.RGB, PicoGL.RGB32F]
                                    : null;

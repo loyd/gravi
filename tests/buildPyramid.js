@@ -18,21 +18,12 @@ describe('buildPyramid step', () => {
             1,1,1,1, 2,2,2,2,  1,1,1,1, 2,2,2,2,  1,1,1,1, 2,2,2,2,  1,1,1,1, 2,2,2,2,
             2,2,2,2, 1,1,1,1,  2,2,2,2, 1,1,1,1,  2,2,2,2, 1,1,1,1,  2,2,2,2, 1,1,1,1,
         ], [
-            [
-                6,6,6,6, 6,6,6,6,  6,6,6,6, 6,6,6,6,
-                6,6,6,6, 6,6,6,6,  6,6,6,6, 6,6,6,6,
+            6,6,6,6, 6,6,6,6,  6,6,6,6, 6,6,6,6,      24,24,24,24,  24,24,24,24,
+            6,6,6,6, 6,6,6,6,  6,6,6,6, 6,6,6,6,      24,24,24,24,  24,24,24,24,
 
-                6,6,6,6, 6,6,6,6,  6,6,6,6, 6,6,6,6,
-                6,6,6,6, 6,6,6,6,  6,6,6,6, 6,6,6,6,
-            ],
-            [
-                24,24,24,24,  24,24,24,24,
-                24,24,24,24,  24,24,24,24,
-            ],
-            [
-                96,96,96,96,
-            ],
-        ])
+            6,6,6,6, 6,6,6,6,  6,6,6,6, 6,6,6,6,       0, 0, 0, 0,   0, 0, 0, 0,
+            6,6,6,6, 6,6,6,6,  6,6,6,6, 6,6,6,6,       0, 0, 0, 0,   0, 0, 0, 0,
+        ]);
     });
 });
 
@@ -42,17 +33,13 @@ function test(grid, expected) {
     const gridSize = Math.sqrt(grid.length / 4);
     const gridTex = createFloatTexture(app, gridSize, gridSize, 4).data(new Float32Array(grid));
 
-    const levels = expected.map(data => {
-        const size = Math.sqrt(data.length / 4);
-        return createFloatTexture(app, size, size, 4);
-    });
+    const pyramid = createFloatTexture(app, gridSize - 2, gridSize / 2, 4);
 
-    buildPyramid(app)(gridTex, levels);
+    buildPyramid(app)(gridTex, pyramid);
 
     expect(app.gl.getError()).toBe(0);
 
-    levels.forEach((level, i) => {
-        const actual = readFromTexture(app, level);
-        expect(actual).toEqual(expected[i]);
-    });
+    const actual = readFromTexture(app, pyramid);
+
+    expect(actual).toEqual(expected);
 }
