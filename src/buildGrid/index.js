@@ -1,6 +1,6 @@
 import PicoGL from 'picogl';
 
-import {invariant} from '../utils';
+import {invariant, isFloatTexture} from '../utils';
 
 import assembleVert from './assemble.vert';
 import storeFrag from './store.frag';
@@ -39,7 +39,7 @@ export default function (app) {
             fb = result[mark] = app.createFramebuffer().colorTarget(0, result);
         }
 
-        invariant(bounds.type === PicoGL.FLOAT);
+        invariant(isFloatTexture(bounds, 4));
         invariant(bounds.width === 1 && bounds.height === 1);
 
         // TODO: use an uniform buffer.

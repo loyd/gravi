@@ -1,6 +1,6 @@
 import PicoGL from 'picogl';
 
-import {invariant, log4} from '../utils';
+import {invariant, log4, isFloatTexture} from '../utils';
 
 import introVert from './intro.vert';
 import reduceVert from './reduce.vert';
@@ -106,8 +106,7 @@ export default function (app) {
         let resultFb = result[mark];
 
         if (!resultFb) {
-            invariant(result.type === PicoGL.FLOAT);
-            invariant(result.format === PicoGL.RGBA);
+            invariant(isFloatTexture(result, 4));
 
             resultFb = result[mark] = app.createFramebuffer().colorTarget(0, result);
         }
