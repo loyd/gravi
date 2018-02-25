@@ -1,14 +1,13 @@
 import PicoGL from 'picogl';
 
-import {invariant, log4, isFloatTexture} from '../utils';
+import {invariant, log4, isFloatTexture, isFloatBuffer} from '../utils';
 
 import introVert from './intro.vert';
 import reduceVert from './reduce.vert';
 import storeFrag from './store.frag';
 
 function createVao(app, data, pattern = data.itemSize) {
-    invariant(data.type === PicoGL.FLOAT);
-    invariant(data.itemSize >= 2);
+    invariant(isFloatBuffer(data, 2) || isFloatBuffer(data, 3) || isFloatBuffer(data, 4));
 
     const {gl} = app;
 

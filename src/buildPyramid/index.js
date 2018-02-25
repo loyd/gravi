@@ -1,6 +1,6 @@
 import PicoGL from 'picogl';
 
-import {invariant, isPowerOf2, isFloatTexture} from '../utils';
+import {invariant, isPowerOf2, isFloatTexture, createFloatTexture} from '../utils';
 
 import quadVert from './quad.vert';
 import reduceFrag from './reduce.frag';
@@ -20,12 +20,6 @@ export default function (app) {
     const vao = app.createVertexArray().vertexAttributeBuffer(0, buf);
     const call = app.createDrawCall(prog, vao, PicoGL.TRIANGLE_STRIP);
 
-    const texOptions = {
-        type: PicoGL.FLOAT,
-        format: PicoGL.RGBA,
-        internalFormat: PicoGL.RGBA32F,
-    };
-
     return (grid, result) => {
         invariant(grid.width === grid.height);
         invariant(grid.width >= 8);
@@ -38,8 +32,8 @@ export default function (app) {
         let interim = grid[mark];
 
         if (!interim) {
-            const texA = app.createTexture2D(grid.width / 2, grid.height / 2, texOptions);
-            const texB = app.createTexture2D(grid.width / 4, grid.height / 4, texOptions);
+            const texA = createFloatTexture(app, grid.width / 2, grid.height / 2, 4);
+            const texB = createFloatTexture(app, grid.width / 4, grid.height / 4, 4);
 
             const fbA = app.createFramebuffer().colorTarget(0, texA);
             const fbB = app.createFramebuffer().colorTarget(0, texB);

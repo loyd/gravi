@@ -1,6 +1,6 @@
 import PicoGL from 'picogl';
 
-import {invariant, isFloatTexture} from '../utils';
+import {invariant, isFloatTexture, isFloatBuffer} from '../utils';
 
 import assembleVert from './assemble.vert';
 import storeFrag from './store.frag';
@@ -16,10 +16,8 @@ export default function (app) {
         let call = positions[mark];
 
         if (!call) {
-            invariant(positions.type === PicoGL.FLOAT);
-            invariant(positions.itemSize === 2);
-            invariant(masses.type === PicoGL.FLOAT);
-            invariant(masses.itemSize === 1);
+            invariant(isFloatBuffer(positions, 2));
+            invariant(isFloatBuffer(masses, 1));
             invariant(positions.numItems === masses.numItems);
             invariant(positions[mark] === masses[mark]);
 
@@ -30,11 +28,12 @@ export default function (app) {
             call = positions[mark] = masses[mark] = app.createDrawCall(prog, vao, PicoGL.POINTS);
         }
 
+        invariant(positions[mark] === masses[mark]);
+
         let fb = result[mark];
 
         if (!fb) {
-            invariant(result.type === PicoGL.FLOAT);
-            invariant(result.format === PicoGL.RGBA);
+            invariant(isFloatTexture(result, 4));
 
             fb = result[mark] = app.createFramebuffer().colorTarget(0, result);
         }
