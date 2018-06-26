@@ -29,6 +29,7 @@
     },
     "scripts": {
         "prepare": "TARGET=prod rollup -c",
+        "build": "TARGET=dev rollup -c",
         "test": "TARGET=test rollup -c && karma start",
         "coverage": "TARGET=cov rollup -c && karma start --reporters coverage",
         "clean": "rm -rf dist/ coverage/"
