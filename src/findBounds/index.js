@@ -107,7 +107,8 @@ export default function (app) {
         if (!resultFb) {
             invariant(isFloatTexture(result, 4));
 
-            resultFb = result[mark] = app.createFramebuffer().colorTarget(0, result);
+            resultFb = result[mark] = app.createFramebuffer()
+                .colorTarget(0, result);
         }
 
         const stepCount = Math.max(Math.ceil(log4(data.numItems)), 1);

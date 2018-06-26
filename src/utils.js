@@ -24,7 +24,7 @@ export const isFloatBuffer = (buf, itemSize) => (
 );
 
 export const isUnsignedBuffer = (buf, itemSize) => (
-    buf.type === PicoGL.UNSIGNED &&
+    buf.type === PicoGL.UNSIGNED_INT &&
     buf.itemSize == itemSize
 );
 

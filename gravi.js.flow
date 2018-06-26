@@ -1,18 +1,19 @@
 // @flow
 
-type Node = {
+export type Node = {
     name?: string,
-    position?: [number, number],
+    x?: number,
+    y?: number,
     weight?: number,
 }
 
-type Edge = {
+export type Edge = {
     source: string|number,
     target: string|number,
     weight?: number,
 }
 
-type Config = {
+export type Config = {
     deltaT?: number,
     springCoef?: number,
     springLength?: number,
@@ -22,8 +23,8 @@ type Config = {
     gravityCoef?: number,
 }
 
-declare export default class Graph {
+declare export class Graph {
     configure(Config): this;
-    addNodes(Node[]): this;
-    addEdges(Edge[]): this;
+    addNodes(Iterable<Node>): this;
+    addEdges(Iterable<Edge>): this;
 }

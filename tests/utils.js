@@ -47,7 +47,7 @@ describe('isFloatBuffer and isUnsignedBuffer', () => {
         const app = PicoGL.createApp(document.createElement('canvas'))
             .floatRenderTargets();
 
-        const unsignedBuf = app.createVertexBuffer(PicoGL.UNSIGNED, 2, new Uint32Array(2));
+        const unsignedBuf = app.createVertexBuffer(PicoGL.UNSIGNED_INT, 2, new Uint32Array(2));
         const floatBuf = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array(2));
 
         expect(isFloatBuffer(unsignedBuf, 2)).toBe(false);

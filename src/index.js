@@ -11,7 +11,7 @@ import {createFloatTexture} from './utils';
 
 const GRID_SIZE = 512;
 
-export default class Graph {
+export class Graph {
     constructor(canvas) {
         const app = this._app = PicoGL.createApp(canvas);
 
@@ -35,12 +35,14 @@ export default class Graph {
         this._running = false;
         this._shouldUpdate = false;
 
-        this._findBounds = findBounds(app);
-        this._buildGrid = buildGrid(app);
-        this._buildPyramid = buildPyramid(app);
-        this._simulate = simulate(app);
-        this._drawNodes = drawNodes(app);
-        this._drawEdges = drawEdges(app);
+        this._steps = {
+            findBounds: findBounds(app),
+            buildGrid: buildGrid(app),
+            buildPyramid: buildPyramid(app),
+            simulate: simulate(app),
+            drawNodes: drawNodes(app),
+            drawEdges: drawEdges(app),
+        };
 
         this._buffers = {
             positionsA: null,
@@ -49,14 +51,15 @@ export default class Graph {
             velocitiesB: null,
             masses: null,
             edgesLocs: null,
+            edgepoints: null,
         };
 
         this._textures = {
             bounds: null,
             grid: null,
             pyramid: null,
-            allPositionsA: null,
-            allPositionsB: null,
+            positionsA: null,
+            positionsB: null,
             edges: null,
         };
     }
@@ -70,10 +73,11 @@ export default class Graph {
     addNodes(nodes) {
         let nextId = this._nodes.length;
 
-        for (const {name, position, weight} of nodes) {
+        for (const {name, x, y, weight} of nodes) {
             this._nodes.push({
                 name: name != null ? name : null,
-                position: position || [0, 0],
+                x: x != null ? x : 0,
+                y: y != null ? y : 0,
                 weight: weight != null ? weight : 1,
                 edges: [],
             });
@@ -139,24 +143,36 @@ export default class Graph {
         const masses = new Float32Array(nodeCount);
         const edgesLocs = new Uint32Array(2 * nodeCount);
         const edges = new Float32Array(3 * edgeCount);
+        const endpoints = new Uint32Array(2 * edgeCount);
+        const corners = new Float32Array(12 * nodeCount);
 
-        const l = 0;
+        const cornerTmpl = [-1, 1, -1, -1, 1, 1, 1, 1, -1, -1, 1, -1];
+
+        let endpointsLen = 0;
+        let edgesLen = 0;
+        let cornersLen = 0;
 
         for (let i = 0; i < nodeCount; ++i) {
             const node = this._nodes[i];
 
-            positions[2*i] = node.positions[0];
-            positions[2*i+1] = node.positions[1];
+            positions[2*i] = node.x;
+            positions[2*i+1] = node.y;
             masses[i] = node.weight;
-            edgesLocs[2*i] = l;
+            edgesLocs[2*i] = edgesLen;
 
             for (const edge of node.edges) {
-                edges[l++] = i;
-                edges[l++] = edge.target;
-                edges[l++] = edge.weight;
+                edges[edgesLen++] = i;
+                edges[edgesLen++] = edge.target;
+                edges[edgesLen++] = edge.weight;
+
+                endpoints[endpointsLen++] = i;
+                endpoints[endpointsLen++] = edge.target;
             }
 
-            edgesLocs[2*i+1] = l;
+            edgesLocs[2*i+1] = edgesLen;
+
+            corners.set(cornerTmpl, cornersLen);
+            cornersLen += cornerTmpl.length;
         }
 
         // Update the constants.
@@ -170,46 +186,59 @@ export default class Graph {
         buf.velocitiesA = app.createVertexBuffer(PicoGL.FLOAT, 2, positions.length);
         buf.velocitiesB = app.createVertexBuffer(PicoGL.FLOAT, 2, positions.length);
         buf.masses = app.createVertexBuffer(PicoGL.FLOAT, 1, masses);
-        buf.edgesLocs = app.createVertexBuffer(PicoGL.UNSIGNED, 2, edgesLocs);
+        buf.edgesLocs = app.createVertexBuffer(PicoGL.UNSIGNED_INT, 2, edgesLocs);
+        buf.endpoints = app.createVertexBuffer(PicoGL.UNSIGNED_INT, 1, endpoints);
+        buf.corners = app.createVertexBuffer(PicoGL.FLOAT, 2, corners);
 
         // Create the textures.
 
         tex.bounds = createFloatTexture(app, 1, 1, 4);
         tex.grid = createFloatTexture(app, GRID_SIZE, GRID_SIZE, 4);
         tex.pyramid = createFloatTexture(app, GRID_SIZE - 2, GRID_SIZE / 2, 4);
-
         const posTexSize = Math.ceil(Math.sqrt(nodeCount));
-        tex.allPositionsA = createFloatTexture(app, posTexSize, posTexSize, 2);
-        tex.allPositionsB = createFloatTexture(app, posTexSize, posTexSize, 2);
+
+        tex.positionsA = createFloatTexture(app, posTexSize, posTexSize, 2);
+        tex.positionsB = createFloatTexture(app, posTexSize, posTexSize, 2);
 
         const edgTexSize = Math.ceil(Math.sqrt(edgeCount));
         tex.edges = createFloatTexture(app, edgTexSize, edgTexSize, 2);
+
+        // TEMPORARY.
+        const tmpBuf = new Float32Array(2 * posTexSize * posTexSize);
+        tmpBuf.set(positions);
+        tex.positionsA.data(tmpBuf);
     }
 
     _turn() {
         const buf = this._buffers;
         const tex = this._textures;
+        const steps = this._steps;
 
-        this._findBounds(buf.positionsA, tex.bounds);
+        steps.drawEdges(buf.endpoints, tex.positionsA);
+        steps.drawNodes(buf.corners, tex.positionsA);
 
-        this._buildGrid(buf.positionsA, buf.masses, tex.bounds, tex.grid);
+        /*
+        steps.findBounds(buf.positionsA, tex.bounds);
 
-        this._buildPyramid(tex.grid, tex.pyramid);
+        steps.buildGrid(buf.positionsA, buf.masses, tex.bounds, tex.grid);
 
-        this._simulate(
+        steps.buildPyramid(tex.grid, tex.pyramid);
+
+        steps.simulate(
             buf.positionsA, buf.velocitiesA, buf.masses, buf.edgesLocs,
-            tex.pyramid, tex.grid, tex.allPositionsA, tex.edges,
+            tex.pyramid, tex.grid, tex.positionsA, tex.edges,
             this._constants,
             buf.positionsB, buf.velocitiesB,
-            tex.allPositionsB,
+            tex.positionsB,
         );
 
-        this._drawEdges(tex.edges, tex.allPositionsB);
+        steps.drawEdges(tex.edges, tex.positionsB);
 
-        this._drawNodes(tex.allPositionsB);
+        steps.drawNodes(tex.positionsB);
 
         [buf.positionsA, buf.positionsB] = [buf.positionsB, buf.positionsA];
         [buf.velocitiesA, buf.velocitiesB] = [buf.velocitiesB, buf.velocitiesA];
-        [tex.allPositionsA, tex.allPositionsB] = [tex.allPositionsB, tex.allPositionsA];
+        [tex.positionsA, tex.positionsB] = [tex.positionsB, tex.positionsA];
+        */
     }
 }

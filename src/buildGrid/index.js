@@ -35,7 +35,8 @@ export default function (app) {
         if (!fb) {
             invariant(isFloatTexture(result, 4));
 
-            fb = result[mark] = app.createFramebuffer().colorTarget(0, result);
+            fb = result[mark] = app.createFramebuffer()
+                .colorTarget(0, result);
         }
 
         invariant(isFloatTexture(bounds, 4));
