@@ -8,7 +8,8 @@ module.exports = config => config.set({
     reporters: ['dots'],
 
     //browsers: ['Chromium', 'Firefox'],
-    browsers: ['Firefox'],
+    //browsers: ['Firefox'],
+    browsers: ['Chromium'],
 
     coverageReporter: {
         reporters: [
