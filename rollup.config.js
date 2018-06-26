@@ -53,4 +53,4 @@ const esm = {
     sourcemap,
 };
 
-export default is('test') || is('cov') ? umd : [umd, esm];
+export default is('test') || is('cov') ? umd : [umd, /*esm*/];
