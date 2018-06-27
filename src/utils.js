@@ -38,6 +38,21 @@ export function createFloatTexture(app, width, height, itemSize) {
     });
 }
 
+// TODO: test it.
+export function readFromTexture(app, texture) {
+    const fb = app.createFramebuffer().colorTarget(0, texture);
+    app.readFramebuffer(fb);
+
+    const itemSize = texture.format === PicoGL.RGBA ? 4 : 3;
+
+    const result = new Float32Array(itemSize * texture.width * texture.height);
+    app.gl.readPixels(0, 0, texture.width, texture.height, texture.format, PicoGL.FLOAT, result);
+
+    app.defaultReadFramebuffer();
+
+    return Array.from(result);
+}
+
 export function invariant(expr) {
     if (!expr) {
         const error = new Error;

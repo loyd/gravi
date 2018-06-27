@@ -1,6 +1,10 @@
 import PicoGL from 'picogl';
 
-import {invariant, isFloatTexture, isFloatBuffer} from '../utils';
+import {
+    invariant,
+    createFloatTexture, isFloatTexture, readFromTexture,
+    isFloatBuffer,
+} from '../utils';
 
 import locateVert from './locate.vert';
 import storeFrag from './store.frag';
@@ -10,7 +14,13 @@ export default function (app) {
 
     const prog = app.createProgram(locateVert, storeFrag);
 
-    return (positions, cursor, result) => {
+    const result = createFloatTexture(app, 1, 1, 4)
+        .data(new Float32Array(4));
+
+    const fb = app.createFramebuffer()
+            .colorTarget(0, result);
+
+    return (positions, cursor) => {
         let call = positions[mark];
 
         if (!call) {
@@ -20,15 +30,6 @@ export default function (app) {
                 .vertexAttributeBuffer(0, positions);
 
             call = positions[mark] = app.createDrawCall(prog, vao, PicoGL.POINTS);
-        }
-
-        let fb = result[mark];
-
-        if (!fb) {
-            invariant(isFloatTexture(result, 4));
-
-            fb = result[mark] = app.createFramebuffer()
-                .colorTarget(0, result);
         }
 
         app
@@ -41,5 +42,7 @@ export default function (app) {
         call
             .uniform('cursor', cursor)
             .draw();
+
+        return readFromTexture(app, result)[0] | 0;
     };
 }

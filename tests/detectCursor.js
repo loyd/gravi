@@ -42,13 +42,10 @@ function test(positions, cursor, expected) {
     const app = createApp();
 
     const positionsBuf = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array(positions));
-    const result = createFloatTexture(app, 1, 1, 4);
 
-    detectCursor(app)(positionsBuf, cursor, result);
+    const actual = detectCursor(app)(positionsBuf, cursor);
 
     expect(app.gl.getError()).toBe(0);
-
-    const actual = readFromTexture(app, result)[0];
 
     expect(actual).toEqual(expected);
 }
