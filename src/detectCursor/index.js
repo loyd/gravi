@@ -35,7 +35,7 @@ export default function (app) {
             .drawFramebuffer(fb)
             .viewport(0, 0, 1, 1)
             .clearMask(PicoGL.COLOR_BUFFER_BIT)
-            .clearColor(0, 0, 0, 0)
+            .clearColor(-1, -1, -1, -1)
             .clear();
 
         call

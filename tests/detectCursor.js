@@ -8,25 +8,25 @@ const SIZE = 10;
 
 describe('detectCursor step', () => {
     it('should not detect in the empty case', () => {
-        test([], [10, 10], [0, 0, 0, 0]);
+        test([], [10, 10], -1);
     });
 
     it('should not detect in the outside case', () => {
-        test([FAR, FAR], [10, 10], [0, 0, 0, 0]);
+        test([FAR, FAR], [10, 10], -1);
     });
 
     it('should detect in the exact case', () => {
-        test([10, 10], [10, 10], [0, 0, 0, 1]);
-        test([FAR, FAR, 10, 10], [10, 10], [1, 0, 0, 1]);
+        test([10, 10], [10, 10], 0);
+        test([FAR, FAR, 10, 10], [10, 10], 1);
     });
 
     it('should detect in the near case', () => {
-        test([FAR, FAR, 10 + SIZE/2, 10 + SIZE/2], [10, 10], [1, 0, 0, 1]);
-        test([FAR, FAR, 10 - SIZE/2, 10 - SIZE/2], [10, 10], [1, 0, 0, 1]);
+        test([FAR, FAR, 10 + SIZE/2, 10 + SIZE/2], [10, 10], 1);
+        test([FAR, FAR, 10 - SIZE/2, 10 - SIZE/2], [10, 10], 1);
     });
 
     it('should detect in the corner case', () => {
-        test([FAR, FAR, 10 + SIZE*0.99, 10 + SIZE*0.99], [10, 10], [1, 0, 0, 1]);
+        test([FAR, FAR, 10 + SIZE*0.99, 10 + SIZE*0.99], [10, 10], 1);
     });
 
     it('should detect in the overlap case', () => {
@@ -34,7 +34,7 @@ describe('detectCursor step', () => {
             10 + SIZE/2, 10 + SIZE/2,
             10 - SIZE/2, 10 - SIZE/2,
             10 + SIZE/2, 10 - SIZE/2,
-        ], [10, 10], [2, 0, 0, 1]);
+        ], [10, 10], 2);
     });
 });
 
@@ -48,7 +48,7 @@ function test(positions, cursor, expected) {
 
     expect(app.gl.getError()).toBe(0);
 
-    const actual = readFromTexture(app, result);
+    const actual = readFromTexture(app, result)[0];
 
-    expect(actual.map(round)).toEqual(expected.map(round));
+    expect(actual).toEqual(expected);
 }
