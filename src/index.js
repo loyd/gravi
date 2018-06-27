@@ -6,6 +6,7 @@ import buildPyramid from './buildPyramid';
 import simulate from './simulate';
 import drawNodes from './drawNodes';
 import drawEdges from './drawEdges';
+import detectCursor from './detectCursor';
 
 import {createFloatTexture} from './utils';
 
@@ -42,6 +43,7 @@ export class Graph {
             simulate: simulate(app),
             drawNodes: drawNodes(app),
             drawEdges: drawEdges(app),
+            detectCursor: detectCursor(app),
         };
 
         this._buffers = {
@@ -62,6 +64,8 @@ export class Graph {
             positionsB: null,
             edges: null,
         };
+
+        canvas.addEventListener('click', ev => this._onClick(ev), false);
     }
 
     configure(config) {
@@ -108,6 +112,24 @@ export class Graph {
         this._run();
 
         return this;
+    }
+
+    _onClick(event) {
+        const {canvas} = this._app.gl;
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = rect.height - (event.clientY - rect.top);
+
+        const buf = this._buffers;
+        const steps = this._steps;
+
+        const idx = steps.detectCursor(buf.positionsA, [x, y]);
+
+        if (idx === -1) {
+            return;
+        }
+
+        console.log('CLICK', idx, this._nodes[idx].name);
     }
 
     _run() {
