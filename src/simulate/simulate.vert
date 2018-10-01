@@ -66,7 +66,8 @@ vec2 calcSpringForce() {
     vec2 force = ZERO;
 
     // TODO: what about blending in an another step?
-    for (uint idx = edgesLoc.x; idx < edgesLoc.y; ++idx) {
+    // TODO: fix it.
+    for (uint idx = /*edgesLoc.x*/0u; idx < /*edgesLoc.y*/0u; ++idx) {
         ivec2 coord = ivec2(idx % row, idx / row);
         vec4 edge = texelFetch(edges, coord, 0);
 
@@ -162,24 +163,25 @@ vec2 calcGravityForce() {
 }
 
 void main() {
-    vec2 force = calcSpringForce() + calcRepulseForce() + calcDragForce() + calcGravityForce();
+    //vec2 force = calcSpringForce() + calcRepulseForce() + calcDragForce() + calcGravityForce();
+    vec2 force = calcGravityForce();
 
     vec2 deltaV = force / mass * deltaT;
 
-    vec2 resultVelocity = velocity + deltaV;
+    resultVelocity = velocity + deltaV;
 
     float dist2 = dot(resultVelocity, resultVelocity);
 
+    // TODO: should we restrict velocity here?
     if (dist2 > 1.) {
         resultVelocity *= inversesqrt(dist2);
     }
 
     // TODO: investigate integration methods.
-    resultPosition += resultVelocity * deltaT;
+    resultPosition = position + resultVelocity * deltaT;
 
     int row = textureSize(positions, 0).x;
     vec2 coords = 2. * vec2(gl_VertexID % row, gl_VertexID / row) / float(row) - 1.;
 
-    // TODO: store positions in a texture.
     gl_Position = vec4(coords, 0., 1.);
 }

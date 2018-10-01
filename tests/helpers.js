@@ -10,10 +10,14 @@ export function createApp() {
     return app;
 }
 
+const FLOAT_FORMATS_BY_ITEM_SIZE = {
+    2: [PicoGL.RG,   PicoGL.RG32F],
+    3: [PicoGL.RGB,  PicoGL.RGB32F],
+    4: [PicoGL.RGBA, PicoGL.RGBA32F],
+};
+
 export function createFloatTexture(app, width, height, itemSize) {
-    const [format, internalFormat] = itemSize === 4 ? [PicoGL.RGBA, PicoGL.RGBA32F]
-                                   : itemSize === 3 ? [PicoGL.RGB, PicoGL.RGB32F]
-                                   : null;
+    const [format, internalFormat] = FLOAT_FORMATS_BY_ITEM_SIZE[itemSize];
 
     return app.createTexture2D(width, height, {
         type: PicoGL.FLOAT,
