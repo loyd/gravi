@@ -1,5 +1,5 @@
 module.exports = config => config.set({
-    frameworks: ['jasmine'],
+    frameworks: ['jasmine', 'source-map-support'],
 
     files: ['dist/*.umd.js'],
 
