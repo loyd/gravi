@@ -4,7 +4,7 @@ import buildPyramid from '../src/buildPyramid';
 import {createApp, createFloatTexture, readFromTexture} from './helpers';
 
 describe('buildPyramid step', () => {
-    it('', () => {
+    it('should build a pyramid', () => {
         test([
             1,1,1,1, 2,2,2,2,  1,1,1,1, 2,2,2,2,  1,1,1,1, 2,2,2,2,  1,1,1,1, 2,2,2,2,
             2,2,2,2, 1,1,1,1,  2,2,2,2, 1,1,1,1,  2,2,2,2, 1,1,1,1,  2,2,2,2, 1,1,1,1,

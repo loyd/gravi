@@ -67,7 +67,7 @@ vec2 calcSpringForce() {
 
     // TODO: what about blending in an another step?
     for (uint idx = edgesLoc.x; idx < edgesLoc.y; ++idx) {
-        ivec2 coord = ivec2(idx / row, idx % row);
+        ivec2 coord = ivec2(idx % row, idx / row);
         vec4 edge = texelFetch(edges, coord, 0);
 
         force += calcSpringForce(int(edge.y), edge.z);
@@ -178,7 +178,7 @@ void main() {
     resultPosition += resultVelocity * deltaT;
 
     int row = textureSize(positions, 0).x;
-    vec2 coords = 2. * vec2(gl_VertexID / row, gl_VertexID % row) / float(row) - 1.;
+    vec2 coords = 2. * vec2(gl_VertexID % row, gl_VertexID / row) / float(row) - 1.;
 
     // TODO: store positions in a texture.
     gl_Position = vec4(coords, 0., 1.);
