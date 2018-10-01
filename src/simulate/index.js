@@ -1,6 +1,6 @@
 import PicoGL from 'picogl';
 
-import {invariant, isFloatTexture, isFloatBuffer} from '../utils';
+import {invariant, isFloatTexture, isUnsignedBuffer, isFloatBuffer} from '../utils';
 
 import simulateVert from './simulate.vert';
 import storeFrag from './store.frag';
@@ -17,6 +17,7 @@ function saveConstants(consts, ub) {
     ub.set(5, consts.theta * consts.theta);
     ub.set(6, consts.dragCoef);
     ub.set(7, consts.gravityCoef);
+    ub.update();
 }
 
 export default function (app) {
