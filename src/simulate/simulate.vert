@@ -159,12 +159,17 @@ vec2 calcDragForce() {
 }
 
 vec2 calcGravityForce() {
-    return -kGravity * mass * normalize(position);
+    float dist = length(position);
+
+    if (dist < M_EPS) {
+        return ZERO;
+    }
+
+    return -kGravity * mass * position / dist;
 }
 
 void main() {
-    //vec2 force = calcSpringForce() + calcRepulseForce() + calcDragForce() + calcGravityForce();
-    vec2 force = calcGravityForce();
+    vec2 force = calcSpringForce() + calcRepulseForce() + calcDragForce() + calcGravityForce();
 
     vec2 deltaV = force / mass * deltaT;
 

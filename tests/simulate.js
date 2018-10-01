@@ -22,7 +22,24 @@ describe('simulate step', () => {
                 expect(Math.abs(node.x)).toBe(Math.abs(node.y));
                 expect(Math.abs(node.x)).toBeLessThan(10);
                 expect(Math.abs(node.x)).toBeGreaterThan(9);
+                expect(Math.sign(node.vx)).toBe(-Math.sign(node.x));
+                expect(Math.sign(node.vy)).toBe(-Math.sign(node.y));
             }
+        });
+
+        it('should not move from the center', () => {
+            const {nodes} = test({
+                nodes: [
+                    {x: 0, y: 0},
+                    {x: 0, y: 0},
+                ],
+                constants: {
+                    gravityCoef: 1.,
+                },
+            });
+
+            expect(nodes.map(node => [node.x, node.y])).toEqual([[0, 0], [0, 0]]);
+            expect(nodes.map(node => [node.vx, node.vy])).toEqual([[0, 0], [0, 0]]);
         });
     });
 });
