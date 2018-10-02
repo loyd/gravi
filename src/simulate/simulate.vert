@@ -23,8 +23,8 @@ uniform Constants {
     float kGravity;
 };
 
-out vec2 resultPosition;
-out vec2 resultVelocity;
+flat out vec2 resultPosition;
+flat out vec2 resultVelocity;
 
 const float M_2PI = 6.283185307179586;
 const float M_EPS = 0.00001;
@@ -42,7 +42,7 @@ vec2 calcSpringForce(int idx, float weight) {
     }
 
     int row = textureSize(positions, 0).x;
-    ivec2 coord = ivec2(idx / row, idx / row);
+    ivec2 coord = ivec2(idx % row, idx / row);
 
     vec2 anotherPosition = texelFetch(positions, coord, 0).xy;
 
@@ -185,8 +185,9 @@ void main() {
     // TODO: investigate integration methods.
     resultPosition = position + resultVelocity * deltaT;
 
-    int row = textureSize(positions, 0).x;
-    vec2 coords = 2. * vec2(gl_VertexID % row, gl_VertexID / row) / float(row) - 1.;
+    ivec2 shape = textureSize(positions, 0);
+    vec2 cell = vec2(gl_VertexID % shape.x, gl_VertexID / shape.x);
+    vec2 coords = 2. * (cell + .5) / vec2(shape) - 1.;
 
     gl_Position = vec4(coords, 0., 1.);
 }

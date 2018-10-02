@@ -41,12 +41,27 @@ export function readFromTexture(app, texture) {
     const fb = app.createFramebuffer().colorTarget(0, texture);
     app.readFramebuffer(fb);
 
-    const itemSize = texture.format === PicoGL.RGBA ? 4 : 3;
+    const itemSize = texture.format === PicoGL.RGBA ? 4
+                   : texture.format === PicoGL.RGB ? 3
+                   : texture.format === PicoGL.RG ? 2
+                   : 0;
 
-    const result = new Float32Array(itemSize * texture.width * texture.height);
-    app.gl.readPixels(0, 0, texture.width, texture.height, texture.format, PicoGL.FLOAT, result);
+    expect(itemSize).toBeGreaterThan(0);
+
+    const result = new Float32Array(4 * texture.width * texture.height);
+    app.gl.readPixels(0, 0, texture.width, texture.height, PicoGL.RGBA, PicoGL.FLOAT, result);
 
     app.defaultReadFramebuffer();
+
+    if (itemSize < 4) {
+        const final = [];
+
+        for (let i = 0; i < result.length; i += 4) {
+            final.push(...result.subarray(i, i + itemSize));
+        }
+
+        return final;
+    }
 
     return Array.from(result);
 }

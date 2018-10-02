@@ -4,6 +4,20 @@ import simulate from '../src/simulate';
 import {createApp, createFloatTexture, readFromTexture, readFromBuffer, round} from './helpers';
 
 describe('simulate step', () => {
+    describe('output consistency', () => {
+        for (const n of [1, 2, 10, 24, 25, 26, 511, 512, 513]) {
+            it(`should be applied (${n} nodes)`, () => {
+                const nodes = [];
+
+                for (let i = 0; i < n; ++i) {
+                    nodes.push({x: i, y: i});
+                }
+
+                test({nodes});
+            });
+        }
+    });
+
     describe('gravity force', () => {
         it('should move nodes towards the center', () => {
             const {nodes} = test({
@@ -40,6 +54,11 @@ describe('simulate step', () => {
 
             expect(nodes.map(node => [node.x, node.y])).toEqual([[0, 0], [0, 0]]);
             expect(nodes.map(node => [node.vx, node.vy])).toEqual([[0, 0], [0, 0]]);
+        });
+    });
+
+    describe('drag force', () => {
+        it('', () => {
         });
     });
 });
@@ -93,9 +112,21 @@ function test(config) {
         resultAllPositionsTex,
     );
 
+    expectConsistency(app, resultPositionsBuf, resultAllPositionsTex);
+
     return {
         nodes: combineParts(app, resultPositionsBuf, resultVelocitiesBuf),
     };
+}
+
+function expectConsistency(app, buf, tex) {
+    const bufVec = readFromBuffer(app, buf);
+    const texVec = readFromTexture(app, tex);
+
+    const len = bufVec.length;
+
+    expect(bufVec).toEqual(texVec.slice(0, len));
+    expect(texVec.slice(len)).toEqual(Array.from(Array(texVec.length - len), _ => 0));
 }
 
 function combineParts(app, positionsBuf, velocitiesBuf) {
@@ -119,10 +150,10 @@ function combineParts(app, positionsBuf, velocitiesBuf) {
 }
 
 function createFloatTextureAndFill(app, list, itemSize) {
-    const shape = Math.ceil(Math.sqrt(list.length));
+    const shape = Math.ceil(Math.sqrt(list.length / itemSize));
 
     const tmpBuf = new Float32Array(itemSize * shape * shape);
     tmpBuf.set(list);
 
-    return createFloatTexture(app, shape, shape, 2).data(tmpBuf);
+    return createFloatTexture(app, shape, shape, itemSize).data(tmpBuf);
 }

@@ -1,9 +1,9 @@
 #version 300 es
 
-// TODO: what about highp precision?
-precision mediump float;
+// TODO: highp vs mediump precision.
+precision highp float;
 
-in vec2 resultPosition;
+flat in vec2 resultPosition;
 out vec2 result;
 
 void main() {
