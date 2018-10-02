@@ -34,8 +34,9 @@ describe('simulate step', () => {
 
             for (const node of nodes) {
                 expect(Math.abs(node.x)).toBe(Math.abs(node.y));
-                expect(Math.abs(node.x)).toBeLessThan(10);
-                expect(Math.abs(node.x)).toBeGreaterThan(9);
+                expect(Math.abs(node.vx)).toBe(Math.abs(node.vy));
+                expect(round(Math.abs(node.x))).toBe(9.993);
+                expect(round(Math.abs(node.vx))).toBe(0.071);
                 expect(Math.sign(node.vx)).toBe(-Math.sign(node.x));
                 expect(Math.sign(node.vy)).toBe(-Math.sign(node.y));
             }
@@ -58,7 +59,40 @@ describe('simulate step', () => {
     });
 
     describe('drag force', () => {
-        it('', () => {
+        it('should slow mobile nodes', () => {
+            const {nodes} = test({
+                nodes: [
+                    {vx: .7, vy: .7},
+                    {vx: -.7, vy: .7},
+                    {vx: .7, vy: -.7},
+                    {vx: -.7, vy: -.7},
+                ],
+                constants: {
+                    dragCoef: 1.,
+                },
+            });
+
+            for (const node of nodes) {
+                expect(Math.abs(node.x)).toBe(Math.abs(node.y));
+                expect(Math.abs(node.vx)).toBe(Math.abs(node.vy));
+                expect(round(Math.abs(node.vx))).toBe(.63);
+                expect(round(Math.abs(node.x))).toBe(.063);
+            }
+        });
+
+        it('should not move fixed nodes', () => {
+            const {nodes} = test({
+                nodes: [
+                    {x: 10, y: 10},
+                    {x: -10, y: -10},
+                ],
+                constants: {
+                    dragCoef: 1.,
+                },
+            });
+
+            expect(nodes.map(node => [node.x, node.y])).toEqual([[10, 10], [-10, -10]]);
+            expect(nodes.map(node => [node.vx, node.vy])).toEqual([[0, 0], [0, 0]]);
         });
     });
 });
@@ -73,7 +107,7 @@ function test(config) {
     const edgesLocs = [];
 
     for (const node of config.nodes) {
-        positions.push(node.x, node.y);
+        positions.push(node.x || 0, node.y || 0);
         velocities.push(node.vx || 0, node.vy || 0);
         masses.push(node.mass || 1);
         edgesLocs.push(0, 0);
@@ -91,7 +125,7 @@ function test(config) {
 
     const constants = Object.assign({
         nodeCount,
-        deltaT: 0.02,
+        deltaT: 0.1,
         springCoef: 0,
         springLength: 30,
         repulseCoef: 0,
