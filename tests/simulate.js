@@ -3,7 +3,7 @@ import PicoGL from 'picogl';
 import simulate from '../src/simulate';
 import {createApp, createFloatTexture, readFromTexture, readFromBuffer, round} from './helpers';
 
-fdescribe('simulate step', () => {
+describe('simulate step', () => {
     describe('output consistency', () => {
         for (const n of [1, 2, 10, 24, 25, 26, 511, 512, 513]) {
             it(`should be applied (${n} nodes)`, () => {
@@ -20,7 +20,7 @@ fdescribe('simulate step', () => {
 
     describe('no forces', () => {
         it('should not change velocities', () => {
-            const {nodes} = test({
+            const nodes = test({
                 nodes: [
                     {x: 10, y: 10},
                     {x: -10, y: -10},
@@ -34,7 +34,7 @@ fdescribe('simulate step', () => {
 
     describe('gravity force', () => {
         it('should move nodes towards the center', () => {
-            const {nodes} = test({
+            const nodes = test({
                 nodes: [
                     {x: 10, y: 10},
                     {x: -10, y: 10},
@@ -57,7 +57,7 @@ fdescribe('simulate step', () => {
         });
 
         it('should not move from the center', () => {
-            const {nodes} = test({
+            const nodes = test({
                 nodes: [
                     {x: 0, y: 0},
                     {x: 0, y: 0},
@@ -74,7 +74,7 @@ fdescribe('simulate step', () => {
 
     describe('drag force', () => {
         it('should slow mobile nodes', () => {
-            const {nodes} = test({
+            const nodes = test({
                 nodes: [
                     {vx: .7, vy: .7},
                     {vx: -.7, vy: .7},
@@ -95,7 +95,7 @@ fdescribe('simulate step', () => {
         });
 
         it('should not move fixed nodes', () => {
-            const {nodes} = test({
+            const nodes = test({
                 nodes: [
                     {x: 10, y: 10},
                     {x: -10, y: -10},
@@ -107,6 +107,77 @@ fdescribe('simulate step', () => {
 
             expect(nodes.map(node => [node.x, node.y])).toEqual([[10, 10], [-10, -10]]);
             expect(nodes.map(node => [node.vx, node.vy])).toEqual([[0, 0], [0, 0]]);
+        });
+    });
+
+    describe('spring force', () => {
+        it('should move source node in directed case', () => {
+            const nodes = test({
+                nodes: [
+                    {x: 10, y: 10},
+                    {x: 10, y: 10},
+                    {x: -10, y: -10},
+                ],
+                edges: [
+                    {from: 0, to: 2},
+                    {from: 1, to: 2, weight: 3},
+                ],
+                constants: {
+                    springCoef: 1.,
+                },
+            });
+
+            expect(round(nodes[0].x)).toBe(10.012);
+            expect(round(nodes[0].vx)).toBe(0.121);
+            expect(nodes[0].x).toBe(nodes[0].y);
+            expect(nodes[0].vx).toBe(nodes[0].vy);
+            expect(round(nodes[1].vx)).toBe(0.364);
+            expect(nodes[2]).toEqual({x: -10, y: -10, vx: 0, vy: 0});
+        });
+
+        it('should move both nodes in bidirected case', () => {
+            const nodes = test({
+                nodes: [
+                    {x: 10, y: 10},
+                    {x: -10, y: -10},
+                ],
+                edges: [
+                    {from: 0, to: 1},
+                    {from: 1, to: 0},
+                ],
+                constants: {
+                    springCoef: 1.,
+                },
+            });
+
+            expect(round(nodes[0].x)).toBe(10.012);
+            expect(round(nodes[0].vx)).toBe(0.121);
+            expect(nodes[0].x).toBe(nodes[0].y);
+            expect(nodes[0].vx).toBe(nodes[0].vy);
+            expect(nodes[0].x).toBe(-nodes[1].x);
+            expect(nodes[0].y).toBe(-nodes[1].y);
+            expect(nodes[0].vx).toBe(-nodes[1].vx);
+            expect(nodes[0].vy).toBe(-nodes[1].vy);
+        });
+
+        it('should shift glued nodes', () => {
+            const nodes = test({
+                nodes: [
+                    {x: 10, y: 10},
+                    {x: 10, y: 10},
+                ],
+                edges: [
+                    {from: 0, to: 1},
+                ],
+                constants: {
+                    springCoef: 1.,
+                },
+            });
+
+            expect(nodes[1].x).toBe(10);
+            expect(nodes[1].y).toBe(nodes[1].y);
+            expect(nodes[0].x).toBeLessThan(10);
+            expect(nodes[0].y).not.toBe(nodes[0].x);
         });
     });
 });
@@ -127,6 +198,8 @@ function test(config) {
         edgesLocs.push(0, 0);
     }
 
+    const edges = config.edges ? packEdges(config.edges, edgesLocs) : [];
+
     const positionsBuf = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array(positions));
     const velocitiesBuf = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array(velocities));
     const massesBuf = app.createVertexBuffer(PicoGL.FLOAT, 1, new Float32Array(masses));
@@ -135,7 +208,7 @@ function test(config) {
     const pyramidTex = createFloatTexture(app, 32, 32, 4);  // TODO
     const gridTex = createFloatTexture(app, 4, 4, 4);       // TODO
     const allPositionsTex = createFloatTextureAndFill(app, positions, 2);
-    const edgesTex = createFloatTexture(app, 10, 10, 3);    // TODO
+    const edgesTex = createFloatTextureAndFill(app, edges, 3);
 
     const constants = Object.assign({
         nodeCount,
@@ -162,9 +235,35 @@ function test(config) {
 
     expectConsistency(app, resultPositionsBuf, resultAllPositionsTex);
 
-    return {
-        nodes: combineParts(app, resultPositionsBuf, resultVelocitiesBuf),
-    };
+    return combineParts(app, resultPositionsBuf, resultVelocitiesBuf);
+}
+
+function packEdges(edges, edgesLocs) {
+    edges.sort((a, b) => a.from - b.from);
+
+    const result = [];
+
+    let last = 0;
+    let prevFrom = -1;
+
+    for (const {from, to, weight = 1} of edges) {
+        if (from !== prevFrom) {
+            edgesLocs[2 * from] = last;
+
+            if (prevFrom >= 0) {
+                edgesLocs[2 * prevFrom + 1] = last;
+            }
+
+            prevFrom = from;
+        }
+
+        result.push(from, to, weight);
+        ++last;
+    }
+
+    edgesLocs[2 * prevFrom + 1] = last;
+
+    return result;
 }
 
 function expectConsistency(app, buf, tex) {

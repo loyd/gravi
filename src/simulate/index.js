@@ -62,12 +62,14 @@ export default function (app) {
             invariant(positions.numItems === velocities.numItems);
             invariant(positions.numItems === resultPositions.numItems);
             invariant(positions.numItems === resultVelocities.numItems);
+            invariant(positions.numItems === edgesLocs.numItems);
+            invariant(positions.numItems === masses.numItems);
 
             const vao = app.createVertexArray()
                 .vertexAttributeBuffer(0, positions)
                 .vertexAttributeBuffer(1, velocities)
                 .vertexAttributeBuffer(2, masses)
-                .vertexAttributeBuffer(3, edgesLocs);
+                .vertexIntegerAttributeBuffer(3, edgesLocs);
 
             const tf = app.createTransformFeedback()
                 .feedbackBuffer(0, resultPositions)

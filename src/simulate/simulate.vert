@@ -37,10 +37,6 @@ vec2 getUniqDirection() {
 }
 
 vec2 calcSpringForce(int idx, float weight) {
-    if (idx < 0) {
-        return ZERO;
-    }
-
     int row = textureSize(positions, 0).x;
     ivec2 coord = ivec2(idx % row, idx / row);
 
@@ -67,7 +63,7 @@ vec2 calcSpringForce() {
 
     // TODO: what about blending in an another step?
     // TODO: fix it.
-    for (uint idx = /*edgesLoc.x*/0u; idx < /*edgesLoc.y*/0u; ++idx) {
+    for (uint idx = edgesLoc.x; idx < edgesLoc.y; ++idx) {
         ivec2 coord = ivec2(idx % row, idx / row);
         vec4 edge = texelFetch(edges, coord, 0);
 
