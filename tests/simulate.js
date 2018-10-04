@@ -3,7 +3,7 @@ import PicoGL from 'picogl';
 import simulate from '../src/simulate';
 import {createApp, createFloatTexture, readFromTexture, readFromBuffer, round} from './helpers';
 
-describe('simulate step', () => {
+fdescribe('simulate step', () => {
     describe('output consistency', () => {
         for (const n of [1, 2, 10, 24, 25, 26, 511, 512, 513]) {
             it(`should be applied (${n} nodes)`, () => {
@@ -16,6 +16,20 @@ describe('simulate step', () => {
                 test({nodes});
             });
         }
+    });
+
+    describe('no forces', () => {
+        it('should not change velocities', () => {
+            const {nodes} = test({
+                nodes: [
+                    {x: 10, y: 10},
+                    {x: -10, y: -10},
+                ],
+            });
+
+            expect(nodes.map(node => [node.x, node.y])).toEqual([[10, 10], [-10, -10]]);
+            expect(nodes.map(node => [node.vx, node.vy])).toEqual([[0, 0], [0, 0]]);
+        });
     });
 
     describe('gravity force', () => {
@@ -116,7 +130,7 @@ function test(config) {
     const positionsBuf = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array(positions));
     const velocitiesBuf = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array(velocities));
     const massesBuf = app.createVertexBuffer(PicoGL.FLOAT, 1, new Float32Array(masses));
-    const edgesLocsBuf = app.createVertexBuffer(PicoGL.UNSIGNED_INT, 2, new Float32Array(edgesLocs));
+    const edgesLocsBuf = app.createVertexBuffer(PicoGL.UNSIGNED_INT, 2, new Uint32Array(edgesLocs));
 
     const pyramidTex = createFloatTexture(app, 32, 32, 4);  // TODO
     const gridTex = createFloatTexture(app, 4, 4, 4);       // TODO
