@@ -144,7 +144,7 @@ vec2 calcRepulseForce() {
                    + calcRepulseForce(base + ivec2(1, 0))
                    + calcRepulseForce(base);
         } else {
-            ivec2 base = 4 * node.coords;
+            ivec2 base = 2 * node.coords;
             uint lvlSize = 2u * node.lvlSize;
             uint lvlOffset = node.lvlOffset - lvlSize;
 
