@@ -84,14 +84,10 @@ export default function (app) {
             call = app.createDrawCall(prog, vao, PicoGL.POINTS)
                 .transformFeedback(tf);
 
-            positions[mark] = velocities[mark] = masses[mark] = edgesLocs[mark] = call;
+            positions[mark] = velocities[mark] = call;
         }
 
-        invariant(
-            positions[mark] === velocities[mark] &&
-            positions[mark] === masses[mark] &&
-            positions[mark] === edgesLocs[mark]
-        );
+        invariant(positions[mark] === velocities[mark]);
 
         let fb = resultAllPositions[mark];
 

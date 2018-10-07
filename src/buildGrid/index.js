@@ -19,16 +19,13 @@ export default function (app) {
             invariant(isFloatBuffer(positions, 2));
             invariant(isFloatBuffer(masses, 1));
             invariant(positions.numItems === masses.numItems);
-            invariant(positions[mark] === masses[mark]);
 
             const vao = app.createVertexArray()
                 .vertexAttributeBuffer(0, positions)
                 .vertexAttributeBuffer(1, masses);
 
-            call = positions[mark] = masses[mark] = app.createDrawCall(prog, vao, PicoGL.POINTS);
+            call = positions[mark] = app.createDrawCall(prog, vao, PicoGL.POINTS);
         }
-
-        invariant(positions[mark] === masses[mark]);
 
         let fb = result[mark];
 

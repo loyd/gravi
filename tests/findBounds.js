@@ -77,9 +77,6 @@ describe('findBounds step', () => {
         test(generateRandomLst(2018 * 2), 2, 6);
         test(generateRandomLst(2018 * 4), 4, 6);
     });
-
-    // TODO: test resizing.
-    // TODO: test rotation of input buffers.
 });
 
 function test(lst, itemSize, expectedStepCount) {

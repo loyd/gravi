@@ -6,6 +6,8 @@ export const log4 = x => .5 * Math.log2(x);
 
 export const isPowerOf2 = x => (x & (x - 1)) === 0;
 
+export const nearestPowerOf4th = x => 4 ** Math.max(Math.ceil(log4(x)), 1);
+
 const FLOAT_FORMATS_BY_ITEM_SIZE = {
     2: [PicoGL.RG,   PicoGL.RG32F],
     3: [PicoGL.RGB,  PicoGL.RGB32F],

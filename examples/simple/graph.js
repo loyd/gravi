@@ -8,6 +8,7 @@ const graph = new Graph(canvas)
     .addNodes([
         {name: 'one', x: 100, y: 200},
         {name: 'two', x: 400, y: 400},
+        {name: 'three', x: 150, y: 300},
     ])
     .addEdges([
         {source: 'one', target: 'two'},

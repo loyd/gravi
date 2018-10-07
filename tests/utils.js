@@ -1,7 +1,7 @@
 import PicoGL from 'picogl';
 
 import {
-    log4, isPowerOf2,
+    log4, isPowerOf2, nearestPowerOf4th,
     isFloatTexture, isFloatBuffer, isUnsignedBuffer,
     createFloatTexture,
 } from '../src/utils';
@@ -12,6 +12,16 @@ describe('log4', () => {
         expect(log4(0)).toBe(-Infinity);
         expect(log4(4)).toBe(1);
         expect(log4(256)).toBe(4);
+    });
+});
+
+describe('nearestPowerOf4th', () => {
+    it('should calculate the nearest power of 4', () => {
+        expect(nearestPowerOf4th(0)).toBe(4);
+        expect(nearestPowerOf4th(1)).toBe(4);
+        expect(nearestPowerOf4th(3)).toBe(4);
+        expect(nearestPowerOf4th(4)).toBe(4);
+        expect(nearestPowerOf4th(5)).toBe(16);
     });
 });
 

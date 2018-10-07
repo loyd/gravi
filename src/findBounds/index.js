@@ -63,10 +63,6 @@ class Kit {
         this.tf = tf;
     }
 
-    resize(size) {
-        // TODO: implement resizing.
-    }
-
     draw(size, tf) {
         this.call.numElements = size;
 
@@ -89,6 +85,7 @@ export default function (app) {
     let N = -1;
     let tempA = null;
     let tempB = null;
+    let stepCount = -1;
 
     // 1-4: data --(intro)-> result
     // 5-16: data --(intro)-> tempA --(reduce)-> result
@@ -98,8 +95,16 @@ export default function (app) {
     return (data, result) => {
         let activeKit = data[mark];
 
+        invariant(N === -1 || N === data.numItems);
+
         if (!activeKit) {
             activeKit = data[mark] = Kit.readable(app, introProg, data, 2);
+
+            N = data.numItems;
+            stepCount = Math.max(Math.ceil(log4(N)), 1);
+
+            tempA = Kit.duplex(app, reduceProg, 4 ** (stepCount - 1));
+            tempB = Kit.duplex(app, reduceProg, 4 ** (stepCount - 2));
         }
 
         let resultFb = result[mark];
@@ -109,15 +114,6 @@ export default function (app) {
 
             resultFb = result[mark] = app.createFramebuffer()
                 .colorTarget(0, result);
-        }
-
-        const stepCount = Math.max(Math.ceil(log4(data.numItems)), 1);
-
-        if (data.numItems !== N) {
-            N = data.numItems;
-
-            tempA = tempA ? tempA.resize(N) : Kit.duplex(app, reduceProg, 4 ** (stepCount - 1));
-            tempB = tempB ? tempB.resize(N) : Kit.duplex(app, reduceProg, 4 ** (stepCount - 2));
         }
 
         activeKit.call.uniform('N', N);
