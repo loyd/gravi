@@ -189,14 +189,14 @@ describe('simulate step', () => {
                     {x: 15, y: 15},
                 ],
                 grid: [
-                    0,0,0,0, 0,0,0,0, 0,0,0,0, 30,30,2,100,
-                    0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
-                    0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
-                    0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+                    0,0,0,100, 0,0,0,100, 0,0,0,100, 30,30,2,100,
+                    0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,
+                    0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,
+                    0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,
                 ],
                 pyramid: [
-                    0,0,0,0, 30,30,2,100,
-                    0,0,0,0, 0,0,0,0,
+                    0,0,0,400, 30,30,2,400,
+                    0,0,0,400, 0,0,0,400,
                 ],
                 constants: {
                     repulseCoef: 1.,
@@ -204,34 +204,106 @@ describe('simulate step', () => {
             });
 
             expect(nodes[0].x).toBeGreaterThan(15);
+            expect(nodes[0].x).toBeLessThan(15.11);
             expect(nodes[0].y).toBe(15);
             expect(nodes[1].x).toBeLessThan(15);
+            expect(nodes[1].x).toBeGreaterThan(14.89);
             expect(nodes[1].y).toBe(15);
         });
 
-		it('should nod move alone node', () => {
-			const nodes = test({
-				nodes: [
-					{x: 17, y: 17},
-				],
-				grid: [
-					0,0,0,0, 0,0,0,0, 0,0,0,0, 17,17,1,100,
-					0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
-					0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
-					0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
-				],
-				pyramid: [
-					0,0,0,0, 17,17,1,100,
-					0,0,0,0, 0,0,0,0,
-				],
-				constants: {
-					repulseCoef: 1.,
-				},
-			});
+        it('should not move alone node', () => {
+            const nodes = test({
+                nodes: [
+                    {x: 17, y: 17},
+                ],
+                grid: [
+                    0,0,0,100, 0,0,0,100, 0,0,0,100, 17,17,1,100,
+                    0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,
+                    0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,
+                    0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,
+                ],
+                pyramid: [
+                    0,0,0,400, 17,17,1,400,
+                    0,0,0,400, 0,0,0,400,
+                ],
+                constants: {
+                    repulseCoef: 1.,
+                },
+            });
 
-			expect(nodes[0].x).toBe(17);
-			expect(nodes[0].y).toBe(17);
-		});
+            expect(nodes[0].x).toBe(17);
+            expect(nodes[0].y).toBe(17);
+        });
+
+        it('should move nodes in far cells', () => {
+            const nodes = test({
+                nodes: [
+                    {x: 17, y: 17},
+                    {x: -17, y: -17},
+                ],
+                grid: [
+                    0,0,0,100, 0,0,0,100, 0,0,0,100,     0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,
+                    0,0,0,100, 0,0,0,100, 0,0,0,100,     0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,
+                    0,0,0,100, 0,0,0,100, 0,0,0,100,     0,0,0,100, 0,0,0,100, 17,17,1,100, 0,0,0,100, 0,0,0,100,
+                    0,0,0,100, 0,0,0,100, 0,0,0,100,     0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,
+                    0,0,0,100, 0,0,0,100, 0,0,0,100,     0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,
+                    0,0,0,100, 0,0,0,100, -17,-17,1,100, 0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,
+                    0,0,0,100, 0,0,0,100, 0,0,0,100,     0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,
+                    0,0,0,100, 0,0,0,100, 0,0,0,100,     0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,
+                ],
+                pyramid: [
+                    0,0,0,400, 0,0,0,400,     0,0,0,400,   0,0,0,400,  0,0,0,1600,     17,17,1,1600,
+                    0,0,0,400, 0,0,0,400,     17,17,1,400, 0,0,0,400,  -17,-17,1,1600, 0,0,0,1600,
+                    0,0,0,400, -17,-17,1,400, 0,0,0,400,   0,0,0,400,  0,0,0,0,        0,0,0,0,
+                    0,0,0,400, 0,0,0,400,     0,0,0,400,   0,0,0,400,  0,0,0,0,        0,0,0,0,
+                ],
+                constants: {
+                    repulseCoef: 1.,
+                },
+            });
+
+            expect(nodes[0].x).toBe(nodes[0].y);
+            expect(nodes[0].x).toBeGreaterThan(17);
+            expect(nodes[0].x).toBeLessThan(17.1);
+            expect(nodes[1].x).toBe(nodes[1].y);
+            expect(nodes[1].x).toBeLessThan(-17);
+            expect(nodes[1].x).toBeGreaterThan(-17.1);
+        });
+
+        it('should move nodes in near cells', () => {
+            const nodes = test({
+                nodes: [
+                    {x: 5, y: 5},
+                    {x: -5, y: -5},
+                ],
+                grid: [
+                    0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,   0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,
+                    0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,   0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,
+                    0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,   0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,
+                    0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,   5,5,1,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,
+                    0,0,0,100, 0,0,0,100, 0,0,0,100, -5,-5,1,100, 0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,
+                    0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,   0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,
+                    0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,   0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,
+                    0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,   0,0,0,100, 0,0,0,100, 0,0,0,100, 0,0,0,100,
+                ],
+                pyramid: [
+                    0,0,0,400, 0,0,0,400,   0,0,0,400, 0,0,0,400,  0,0,0,1600,   5,5,1,1600,
+                    0,0,0,400, 0,0,0,400,   5,5,1,400, 0,0,0,400,  -5,-5,1,1600, 0,0,0,1600,
+                    0,0,0,400, -5,-5,1,400, 0,0,0,400, 0,0,0,400,  0,0,0,0,      0,0,0,0,
+                    0,0,0,400, 0,0,0,400,   0,0,0,400, 0,0,0,400,  0,0,0,0,      0,0,0,0,
+                ],
+                constants: {
+                    repulseCoef: 1.,
+                },
+            });
+
+            expect(nodes[0].x).toBe(nodes[0].y);
+            expect(nodes[0].x).toBeGreaterThan(5);
+            expect(nodes[0].x).toBeLessThan(5.1);
+            expect(nodes[1].x).toBe(nodes[1].y);
+            expect(nodes[1].x).toBeLessThan(-5);
+            expect(nodes[1].x).toBeGreaterThan(-5.1);
+        });
     });
 });
 
@@ -258,10 +330,19 @@ function test(config) {
     const massesBuf = app.createVertexBuffer(PicoGL.FLOAT, 1, new Float32Array(masses));
     const edgesLocsBuf = app.createVertexBuffer(PicoGL.UNSIGNED_INT, 2, new Uint32Array(edgesLocs));
 
-    const pyramidTex = createFloatTextureAndFill(app, config.pyramid || zeroed(2 * 2 * 4), 4);
-    const gridTex = createFloatTextureAndFill(app, config.grid || zeroed(4 * 4 * 4), 4);
-    const allPositionsTex = createFloatTextureAndFill(app, positions, 2);
-    const edgesTex = createFloatTextureAndFill(app, edges, 3);
+    let pyramidTex;
+
+    if (config.pyramid) {
+        const height = (2 + Math.sqrt(4 + 8 * config.pyramid.length / 4)) / 4;
+        const width = 2 * height - 2;
+        pyramidTex = createRectFloatTextureAndFill(app, config.pyramid, width, height, 4);
+    } else {
+        pyramidTex = createSquareFloatTextureAndFill(app, zeroed(2 * 2 * 4), 4);
+    }
+
+    const gridTex = createSquareFloatTextureAndFill(app, config.grid || zeroed(4 * 4 * 4), 4);
+    const allPositionsTex = createSquareFloatTextureAndFill(app, positions, 2);
+    const edgesTex = createSquareFloatTextureAndFill(app, edges, 3);
 
     const constants = Object.assign({
         nodeCount,
@@ -269,7 +350,7 @@ function test(config) {
         springCoef: 0,
         springLength: 30,
         repulseCoef: 0,
-        theta: 0.8,
+        theta: 1,
         dragCoef: 0,
         gravityCoef: 0,
     }, config.constants);
@@ -351,11 +432,16 @@ function combineParts(app, positionsBuf, velocitiesBuf) {
     return nodes;
 }
 
-function createFloatTextureAndFill(app, list, itemSize) {
+function createSquareFloatTextureAndFill(app, list, itemSize) {
     const shape = Math.ceil(Math.sqrt(list.length / itemSize));
 
-    const tmpBuf = new Float32Array(itemSize * shape * shape);
+    return createRectFloatTextureAndFill(app, list, shape, shape, itemSize);
+}
+
+function createRectFloatTextureAndFill(app, list, width, height, itemSize) {
+    const tmpBuf = new Float32Array(itemSize * width * height);
     tmpBuf.set(list);
 
-    return createFloatTexture(app, shape, shape, itemSize).data(tmpBuf);
+    return createFloatTexture(app, width, height, itemSize).data(tmpBuf);
+
 }
