@@ -7,6 +7,7 @@ layout(location = 3) in uvec2 edgesLoc;
 
 const uint MAX_PYRAMID_LEVELS = 12u; // up to 8192x8192 grid
 
+uniform sampler2D bounds;
 uniform sampler2D pyramid;
 uniform sampler2D grid;
 uniform sampler2D positions;
@@ -104,16 +105,21 @@ vec2 calcRepulseForce() {
         ivec2 coords;
         uint lvlSize;
         uint lvlOffset;
+        float area;
     };
 
     Node stack[MAX_STACK_SIZE];
 
     uint lastLvlOffset = uint(textureSize(pyramid, 0).x) - 2u;
 
-    stack[0] = Node(ivec2(0, 1), 2u, lastLvlOffset);
-    stack[1] = Node(ivec2(1, 1), 2u, lastLvlOffset);
-    stack[2] = Node(ivec2(1, 0), 2u, lastLvlOffset);
-    stack[3] = Node(ivec2(0, 0), 2u, lastLvlOffset);
+    vec4 minmax = texelFetch(bounds, ivec2(0, 0), 0);
+    vec2 lastLvlShape = minmax.zw - minmax.xy;
+    float lastLvlArea = .25 * (lastLvlShape.x * lastLvlShape.y);
+
+    stack[0] = Node(ivec2(0, 1), 2u, lastLvlOffset, lastLvlArea);
+    stack[1] = Node(ivec2(1, 1), 2u, lastLvlOffset, lastLvlArea);
+    stack[2] = Node(ivec2(1, 0), 2u, lastLvlOffset, lastLvlArea);
+    stack[3] = Node(ivec2(0, 0), 2u, lastLvlOffset, lastLvlArea);
 
     uint sp = 4u;
 
@@ -134,7 +140,7 @@ vec2 calcRepulseForce() {
         vec2 delta = position - regionCenter;
         float dist2 = dot(delta, delta);
 
-        if (region.w < kTheta2 * dist2) {
+        if (node.area < kTheta2 * dist2) {
             force += regionMass * delta / pow(dist2, 1.5);
         } else if (node.lvlOffset == 0u) {
             ivec2 base = 2 * node.coords;
@@ -147,11 +153,12 @@ vec2 calcRepulseForce() {
             ivec2 base = 2 * node.coords;
             uint lvlSize = 2u * node.lvlSize;
             uint lvlOffset = node.lvlOffset - lvlSize;
+            float area = .25 * node.area;
 
-            stack[sp++] = Node(base + ivec2(0, 1), lvlSize, lvlOffset);
-            stack[sp++] = Node(base + ivec2(1, 1), lvlSize, lvlOffset);
-            stack[sp++] = Node(base + ivec2(1, 0), lvlSize, lvlOffset);
-            stack[sp++] = Node(base, lvlSize, lvlOffset);
+            stack[sp++] = Node(base + ivec2(0, 1), lvlSize, lvlOffset, area);
+            stack[sp++] = Node(base + ivec2(1, 1), lvlSize, lvlOffset, area);
+            stack[sp++] = Node(base + ivec2(1, 0), lvlSize, lvlOffset, area);
+            stack[sp++] = Node(base, lvlSize, lvlOffset, area);
         }
     }
 

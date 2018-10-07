@@ -33,7 +33,7 @@ export default function (app) {
 
     return (
         positions, velocities, masses, edgesLocs,
-        pyramid, grid, allPositions, edges,
+        bounds, pyramid, grid, allPositions, edges,
         constants,
         resultPositions, resultVelocities,
         resultAllPositions,
@@ -47,6 +47,8 @@ export default function (app) {
         invariant(pyramid.height >= 2);
         invariant(grid.width == grid.height);
         invariant(2 * pyramid.height === grid.height);
+        invariant(isFloatTexture(bounds, 4));
+        invariant(bounds.width === 1 && bounds.height === 1);
 
         if (constants !== prevConstants) {
             saveConstants(constants, constantsUB);
@@ -109,6 +111,7 @@ export default function (app) {
             .texture('grid', grid)
             .texture('positions', allPositions)
             .texture('edges', edges)
+            .texture('bounds', bounds)
             .draw();
     };
 }

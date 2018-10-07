@@ -248,7 +248,7 @@ export class Graph {
 
         steps.simulate(
             buf.positionsA, buf.velocitiesA, buf.masses, buf.edgesLocs,
-            tex.pyramid, tex.grid, tex.positionsA, tex.edges,
+            tex.bounds, tex.pyramid, tex.grid, tex.positionsA, tex.edges,
             this._constants,
             buf.positionsB, buf.velocitiesB,
             tex.positionsB,
