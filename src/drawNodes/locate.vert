@@ -14,7 +14,7 @@ void main() {
 
     vec2 center = texelFetch(positions, coord, 0).xy;
 
-    vec2 position = (center + corner * SIZE) * invShape * 2. - 1.;
+    vec2 position = (center + corner * SIZE) * invShape * 2.;
 
     gl_Position = vec4(position, 0., 1.);
 }
