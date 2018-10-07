@@ -181,7 +181,7 @@ describe('simulate step', () => {
         });
     });
 
-    fdescribe('repulse force', () => {
+    describe('repulse force', () => {
         it('should shift centered nodes', () => {
             const nodes = test({
                 nodes: [
