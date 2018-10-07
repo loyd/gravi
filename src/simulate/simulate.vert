@@ -74,18 +74,22 @@ vec2 calcSpringForce() {
 
 vec2 calcRepulseForce(ivec2 coords) {
     vec3 cell = texelFetch(grid, coords, 0).xyz;
+    float cellMass = cell.z;
 
-    if (cell.z < M_EPS) {
+    if (cellMass < M_EPS) {
         return ZERO;
     }
 
-    vec2 cellCenter = cell.xy / cell.z;
+    vec2 cellCenter = cell.xy / cellMass;
 
     vec2 delta = position - cellCenter;
     float dist = length(delta);
 
-    // TODO: apply for everyone?
     if (dist < M_EPS) {
+        if (cellMass == mass) {
+            return ZERO;
+        }
+
         delta = 0.01 * getUniqDirection();
         dist = 0.01;
     }

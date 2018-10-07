@@ -181,20 +181,21 @@ describe('simulate step', () => {
         });
     });
 
-    describe('repulse force', () => {
+    fdescribe('repulse force', () => {
         it('should shift centered nodes', () => {
             const nodes = test({
                 nodes: [
                     {x: 15, y: 15},
+                    {x: 15, y: 15},
                 ],
                 grid: [
-                    0,0,0,0, 0,0,0,0, 0,0,0,0, 15,15,1,100,
+                    0,0,0,0, 0,0,0,0, 0,0,0,0, 30,30,2,100,
                     0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
                     0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
                     0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
                 ],
                 pyramid: [
-                    0,0,0,0, 15,15,1,100,
+                    0,0,0,0, 30,30,2,100,
                     0,0,0,0, 0,0,0,0,
                 ],
                 constants: {
@@ -204,7 +205,33 @@ describe('simulate step', () => {
 
             expect(nodes[0].x).toBeGreaterThan(15);
             expect(nodes[0].y).toBe(15);
+            expect(nodes[1].x).toBeLessThan(15);
+            expect(nodes[1].y).toBe(15);
         });
+
+		it('should nod move alone node', () => {
+			const nodes = test({
+				nodes: [
+					{x: 17, y: 17},
+				],
+				grid: [
+					0,0,0,0, 0,0,0,0, 0,0,0,0, 17,17,1,100,
+					0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+					0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+					0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+				],
+				pyramid: [
+					0,0,0,0, 17,17,1,100,
+					0,0,0,0, 0,0,0,0,
+				],
+				constants: {
+					repulseCoef: 1.,
+				},
+			});
+
+			expect(nodes[0].x).toBe(17);
+			expect(nodes[0].y).toBe(17);
+		});
     });
 });
 
