@@ -175,9 +175,35 @@ describe('simulate step', () => {
             });
 
             expect(nodes[1].x).toBe(10);
-            expect(nodes[1].y).toBe(nodes[1].y);
+            expect(nodes[1].y).toBe(10);
             expect(nodes[0].x).toBeLessThan(10);
-            expect(nodes[0].y).not.toBe(nodes[0].x);
+            expect(nodes[0].y).toBe(10);
+        });
+    });
+
+    describe('repulse force', () => {
+        it('should shift centered nodes', () => {
+            const nodes = test({
+                nodes: [
+                    {x: 15, y: 15},
+                ],
+                grid: [
+                    0,0,0,0, 0,0,0,0, 0,0,0,0, 15,15,1,100,
+                    0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+                    0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+                    0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+                ],
+                pyramid: [
+                    0,0,0,0, 15,15,1,100,
+                    0,0,0,0, 0,0,0,0,
+                ],
+                constants: {
+                    repulseCoef: 1.,
+                },
+            });
+
+            expect(nodes[0].x).toBeGreaterThan(15);
+            expect(nodes[0].y).toBe(15);
         });
     });
 });
@@ -205,8 +231,8 @@ function test(config) {
     const massesBuf = app.createVertexBuffer(PicoGL.FLOAT, 1, new Float32Array(masses));
     const edgesLocsBuf = app.createVertexBuffer(PicoGL.UNSIGNED_INT, 2, new Uint32Array(edgesLocs));
 
-    const pyramidTex = createFloatTexture(app, 32, 32, 4);  // TODO
-    const gridTex = createFloatTexture(app, 4, 4, 4);       // TODO
+    const pyramidTex = createFloatTextureAndFill(app, config.pyramid || zeroed(2 * 2 * 4), 4);
+    const gridTex = createFloatTextureAndFill(app, config.grid || zeroed(4 * 4 * 4), 4);
     const allPositionsTex = createFloatTextureAndFill(app, positions, 2);
     const edgesTex = createFloatTextureAndFill(app, edges, 3);
 
@@ -237,6 +263,8 @@ function test(config) {
 
     return combineParts(app, resultPositionsBuf, resultVelocitiesBuf);
 }
+
+const zeroed = n => Array.from(Array(n), () => 0);
 
 function packEdges(edges, edgesLocs) {
     edges.sort((a, b) => a.from - b.from);

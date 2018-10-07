@@ -43,6 +43,10 @@ export default function (app) {
         invariant(isFloatTexture(allPositions, 2));
         invariant(isFloatTexture(edges, 3));
         invariant(allPositions.width === resultAllPositions.width);
+        invariant(pyramid.width === 2 * pyramid.height - 2);
+        invariant(pyramid.height >= 2);
+        invariant(grid.width == grid.height);
+        invariant(2 * pyramid.height === grid.height);
 
         if (constants !== prevConstants) {
             saveConstants(constants, constantsUB);

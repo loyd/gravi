@@ -62,7 +62,6 @@ vec2 calcSpringForce() {
     vec2 force = ZERO;
 
     // TODO: what about blending in an another step?
-    // TODO: fix it.
     for (uint idx = edgesLoc.x; idx < edgesLoc.y; ++idx) {
         ivec2 coord = ivec2(idx % row, idx / row);
         vec4 edge = texelFetch(edges, coord, 0);
@@ -76,11 +75,16 @@ vec2 calcSpringForce() {
 vec2 calcRepulseForce(ivec2 coords) {
     vec3 cell = texelFetch(grid, coords, 0).xyz;
 
+    if (cell.z < M_EPS) {
+        return ZERO;
+    }
+
     vec2 cellCenter = cell.xy / cell.z;
 
     vec2 delta = position - cellCenter;
     float dist = length(delta);
 
+    // TODO: apply for everyone?
     if (dist < M_EPS) {
         delta = 0.01 * getUniqDirection();
         dist = 0.01;
@@ -129,7 +133,7 @@ vec2 calcRepulseForce() {
         if (region.w < kTheta2 * dist2) {
             force += regionMass * delta / pow(dist2, 1.5);
         } else if (node.lvlOffset == 0u) {
-            ivec2 base = 4 * node.coords;
+            ivec2 base = 2 * node.coords;
 
             force += calcRepulseForce(base + ivec2(0, 1))
                    + calcRepulseForce(base + ivec2(1, 1))
