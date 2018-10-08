@@ -184,6 +184,7 @@ export class Graph {
 
         const cornerTmpl = [-1, 1, -1, -1, 1, 1, 1, 1, -1, -1, 1, -1];
 
+        let edgesLocsLen = 0;
         let endpointsLen = 0;
         let edgesLen = 0;
         let cornersLen = 0;
@@ -194,7 +195,7 @@ export class Graph {
             positions[2*i] = node.x;
             positions[2*i+1] = node.y;
             masses[i] = node.weight;
-            edgesLocs[2*i] = edgesLen;
+            edgesLocs[2*i] = edgesLocsLen;
 
             for (const edge of node.edges) {
                 edges[edgesLen++] = i;
@@ -203,9 +204,11 @@ export class Graph {
 
                 endpoints[endpointsLen++] = i;
                 endpoints[endpointsLen++] = edge.target;
+
+                ++edgesLocsLen;
             }
 
-            edgesLocs[2*i+1] = edgesLen;
+            edgesLocs[2*i+1] = edgesLocsLen;
 
             corners.set(cornerTmpl, cornersLen);
             cornersLen += cornerTmpl.length;
