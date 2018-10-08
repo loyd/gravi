@@ -248,6 +248,14 @@ export class Graph {
         tex.edges = createFloatTexture(app, edgTexSize, edgTexSize, 3).data(edges);
     }
 
+    _clear() {
+        this._app
+            .defaultDrawFramebuffer()
+            .viewport(0, 0, this._app.width, this._app.height)
+            .clearColor(0, 0, 0, 0)
+            .clear();
+    }
+
     _turn() {
         const buf = this._buffers;
         const tex = this._textures;
@@ -266,6 +274,8 @@ export class Graph {
             buf.positionsB, buf.velocitiesB,
             tex.positionsB,
         );
+
+        this._clear();
 
         steps.drawEdges(buf.endpoints, tex.positionsA);
 
