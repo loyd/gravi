@@ -19,7 +19,6 @@ export class Graph {
         app.floatRenderTargets();
 
         /* VivaGraph:
-         *  deltaT: 0.0,
          *  deltaT: 0.02,
          *  springCoef: 0.0002,
          *  springLength: 30,
@@ -124,6 +123,10 @@ export class Graph {
         return this;
     }
 
+    halt() {
+        this._running = false;
+    }
+
     _onClick(event) {
         const {canvas} = this._app.gl;
         const rect = canvas.getBoundingClientRect();
@@ -146,13 +149,17 @@ export class Graph {
         this._shouldUpdate = true;
 
         if (!this._running) {
-            this._progress();
             this._running = true;
+            this._progress();
         }
     }
 
     _progress() {
         window.requestAnimationFrame(_ => {
+            if (!this._running) {
+                return;
+            }
+
             if (this._shouldUpdate) {
                 this._update();
                 this._shouldUpdate = false;
