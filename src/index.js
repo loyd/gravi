@@ -8,9 +8,7 @@ import drawNodes from './drawNodes';
 import drawEdges from './drawEdges';
 import detectCursor from './detectCursor';
 
-import {createFloatTexture, nearestPowerOf4th} from './utils';
-
-const GRID_SIZE = 512;
+import {createFloatTexture, nearestPowerOfTwo, nearestPowerOfFour} from './utils';
 
 export class Graph {
     constructor(canvas) {
@@ -193,7 +191,10 @@ export class Graph {
         const nodeCount = this._nodes.length;
         const edgeCount = this._edgeCount;
 
-        const positionsVboLen = 2 * nearestPowerOf4th(nodeCount);
+        // TODO: improve the heuristic.
+        const gridSize = Math.max(nearestPowerOfTwo(Math.sqrt(3 * nodeCount)), 8);
+
+        const positionsVboLen = 2 * nearestPowerOfFour(nodeCount);
         const posTexSize = Math.ceil(Math.sqrt(nodeCount));
         const edgTexSize = Math.ceil(Math.sqrt(edgeCount));
 
@@ -261,8 +262,8 @@ export class Graph {
         // Create the textures.
 
         tex.bounds = createFloatTexture(app, 1, 1, 4);
-        tex.grid = createFloatTexture(app, GRID_SIZE, GRID_SIZE, 4);
-        tex.pyramid = createFloatTexture(app, GRID_SIZE - 2, GRID_SIZE / 2, 4);
+        tex.grid = createFloatTexture(app, gridSize, gridSize, 4);
+        tex.pyramid = createFloatTexture(app, gridSize - 2, gridSize / 2, 4);
 
         tex.positionsA = createFloatTexture(app, posTexSize, posTexSize, 2).data(positions);
         tex.positionsB = createFloatTexture(app, posTexSize, posTexSize, 2);
