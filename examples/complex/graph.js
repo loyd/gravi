@@ -56,4 +56,13 @@ function run() {
         })
         .addNodes(nodes)
         .addEdges(edges)
+        .run();
+}
+
+function tryRun() {
+    try {
+        run();
+    } catch (ex) {
+        console.error(ex);
+    }
 }

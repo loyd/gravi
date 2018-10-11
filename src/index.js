@@ -44,6 +44,7 @@ export class Graph {
 
         this._running = false;
         this._shouldUpdate = false;
+        this._shouldDraw = true;
 
         this._steps = {
             findBounds: findBounds(app),
@@ -78,7 +79,19 @@ export class Graph {
     }
 
     configure(config) {
-        this._constants = Object.assign({}, this._constants, config);
+        this._constants = Object.assign({}, this._constants, {
+            deltaT: config.deltaT,
+            springCoef: config.springCoef,
+            springLength: config.springLength,
+            repulseCoef: config.repulseCoef,
+            theta: config.theta,
+            dragCoef: config.dragCoef,
+            gravityCoef: config.gravityCoef,
+        });
+
+        this._shouldDraw = config.shouldDraw == null ? true : config.shouldDraw;
+
+        this._shouldUpdate = true;
 
         return this;
     }
@@ -100,7 +113,7 @@ export class Graph {
             }
         }
 
-        this._run();
+        this._shouldUpdate = true;
 
         return this;
     }
@@ -118,13 +131,40 @@ export class Graph {
             ++this._edgeCount;
         }
 
-        this._run();
+        this._shouldUpdate = true;
 
         return this;
     }
 
+    run() {
+        if (!this._running) {
+            this._running = true;
+            this._schedule();
+        }
+    }
+
+    step() {
+        if (this._shouldUpdate) {
+            this._update();
+            this._shouldUpdate = false;
+        }
+
+        this._turn();
+    }
+
     halt() {
         this._running = false;
+    }
+
+    _schedule() {
+        if (!this._running) {
+            return;
+        }
+
+        window.requestAnimationFrame(_ => {
+            this.step();
+            this._schedule();
+        });
     }
 
     _onClick(event) {
@@ -143,31 +183,6 @@ export class Graph {
         }
 
         console.log('CLICK', idx, this._nodes[idx].name);
-    }
-
-    _run() {
-        this._shouldUpdate = true;
-
-        if (!this._running) {
-            this._running = true;
-            this._progress();
-        }
-    }
-
-    _progress() {
-        window.requestAnimationFrame(_ => {
-            if (!this._running) {
-                return;
-            }
-
-            if (this._shouldUpdate) {
-                this._update();
-                this._shouldUpdate = false;
-            }
-
-            this._turn();
-            this._progress();
-        });
     }
 
     _update() {
@@ -284,9 +299,10 @@ export class Graph {
 
         this._clear();
 
-        steps.drawEdges(buf.endpoints, tex.positionsA);
-
-        steps.drawNodes(buf.corners, tex.positionsA);
+        if (this._shouldDraw) {
+            steps.drawEdges(buf.endpoints, tex.positionsA);
+            steps.drawNodes(buf.corners, tex.positionsA);
+        }
 
         [buf.positionsA, buf.positionsB] = [buf.positionsB, buf.positionsA];
         [buf.velocitiesA, buf.velocitiesB] = [buf.velocitiesB, buf.velocitiesA];

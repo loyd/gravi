@@ -14,4 +14,5 @@ const graph = new Graph(canvas)
     .addEdges([
         {source: 'one', target: 'two'},
         {source: 'three', target: 'four'},
-    ]);
+    ])
+    .run();
