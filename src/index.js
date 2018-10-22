@@ -4,11 +4,13 @@ import findBounds from './findBounds';
 import buildGrid from './buildGrid';
 import buildPyramid from './buildPyramid';
 import simulate from './simulate';
+import detectCursor from './detectCursor';
+import selectNodes from './selectNodes';
 import drawNodes from './drawNodes';
 import drawEdges from './drawEdges';
-import detectCursor from './detectCursor';
+import drawLabels from './drawLabels';
 
-import {createFloatTexture, nearestPowerOfTwo, nearestPowerOfFour} from './utils';
+import {createFloatTexture, nearestPowerOfTwo, nearestPowerOfFour, pick} from './utils';
 
 export class Graph {
     constructor(canvas) {
@@ -43,15 +45,20 @@ export class Graph {
         this._running = false;
         this._shouldUpdate = false;
         this._shouldDraw = true;
+        this._shouldDrawLabels = false;
+
+        this._viewport = [-app.width/2, -app.height/2, app.width, app.height];
 
         this._steps = {
             findBounds: findBounds(app),
             buildGrid: buildGrid(app),
             buildPyramid: buildPyramid(app),
             simulate: simulate(app),
+            detectCursor: detectCursor(app),
+            selectNodes: selectNodes(app),
             drawNodes: drawNodes(app),
             drawEdges: drawEdges(app),
-            detectCursor: detectCursor(app),
+            drawLabels: drawLabels(app),
         };
 
         this._buffers = {
@@ -77,17 +84,17 @@ export class Graph {
     }
 
     configure(config) {
-        this._constants = Object.assign({}, this._constants, {
-            deltaT: config.deltaT,
-            springCoef: config.springCoef,
-            springLength: config.springLength,
-            repulseCoef: config.repulseCoef,
-            theta: config.theta,
-            dragCoef: config.dragCoef,
-            gravityCoef: config.gravityCoef,
-        });
+        this._constants = Object.assign({}, this._constants, pick(config,
+            ['deltaT', 'springCoef', 'springLength', 'repulseCoef', 'theta', 'dragCoef', 'gravityCoef']
+        ));
 
-        this._shouldDraw = config.shouldDraw == null ? true : config.shouldDraw;
+        if (config.shouldDraw != null) {
+            this._shouldDraw = config.shouldDraw;
+        }
+
+        if (config.shouldDrawLabels != null) {
+            this._shouldDrawLabels = config.shouldDrawLabels;
+        }
 
         this._shouldUpdate = true;
 
@@ -191,6 +198,9 @@ export class Graph {
         const nodeCount = this._nodes.length;
         const edgeCount = this._edgeCount;
 
+        // TODO: select cell number by canvas and font sizes.
+        const vpGridShape = [10, 3];
+
         // TODO: improve the heuristic.
         const gridSize = Math.max(nearestPowerOfTwo(Math.sqrt(3 * nodeCount)), 8);
 
@@ -203,14 +213,13 @@ export class Graph {
         const edgesLocs = new Uint32Array(2 * nodeCount);
         const edges = new Float32Array(3 * edgTexSize * edgTexSize);
         const endpoints = new Uint32Array(2 * edgeCount);
-        const corners = new Float32Array(12 * nodeCount);
+        const corners = new Float32Array(12 * Math.max(nodeCount, vpGridShape[0] * vpGridShape[1]));
 
         const cornerTmpl = [-1, 1, -1, -1, 1, 1, 1, 1, -1, -1, 1, -1];
 
         let edgesLocsLen = 0;
         let endpointsLen = 0;
         let edgesLen = 0;
-        let cornersLen = 0;
 
         for (let i = 0; i < nodeCount; ++i) {
             const node = this._nodes[i];
@@ -232,9 +241,10 @@ export class Graph {
             }
 
             edgesLocs[2*i+1] = edgesLocsLen;
+        }
 
-            corners.set(cornerTmpl, cornersLen);
-            cornersLen += cornerTmpl.length;
+        for (let i = 0; i < corners.length; i += 12) {
+            corners.set(cornerTmpl, i);
         }
 
         // Update the constants.
@@ -269,6 +279,8 @@ export class Graph {
         tex.positionsB = createFloatTexture(app, posTexSize, posTexSize, 2);
 
         tex.edges = createFloatTexture(app, edgTexSize, edgTexSize, 3).data(edges);
+
+        tex.viewportGrid = createFloatTexture(app, vpGridShape[0], vpGridShape[1], 1);
     }
 
     _clear() {
@@ -302,7 +314,12 @@ export class Graph {
 
         if (this._shouldDraw) {
             steps.drawEdges(buf.endpoints, tex.positionsA);
-            steps.drawNodes(buf.corners, tex.positionsA);
+            steps.drawNodes(buf.corners, tex.positionsA, this._constants.nodeCount);
+
+            if (this._shouldDrawLabels) {
+                steps.selectNodes(buf.positionsA, buf.masses, this._viewport, tex.viewportGrid);
+                steps.drawLabels(buf.corners, tex.viewportGrid, tex.positionsA);
+            }
         }
 
         [buf.positionsA, buf.positionsB] = [buf.positionsB, buf.positionsA];

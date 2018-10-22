@@ -53,6 +53,7 @@ function run() {
             theta: grabNum(form.theta),
             dragCoef: grabNum(form.dragCoef),
             gravityCoef: grabNum(form.gravityCoef),
+            shouldDrawLabels: form.drawLabels.checked,
         })
         .addNodes(nodes)
         .addEdges(edges)

@@ -5,6 +5,7 @@ const {Graph} = gravi;
 const canvas = document.getElementById('area');
 
 const graph = new Graph(canvas)
+    .configure({shouldDrawLabels: true})
     .addNodes([
         {name: 'one', x: 100, y: 200},
         {name: 'two', x: 350, y: 350},

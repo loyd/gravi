@@ -10,7 +10,7 @@ export default function (app) {
 
     const prog = app.createProgram(locateVert, colorFrag);
 
-    return (corners, positions, nodeCount) => {
+    return (corners, grid, positions) => {
         let call = corners[mark];
 
         if (!call) {
@@ -22,16 +22,18 @@ export default function (app) {
             call = corners[mark] = app.createDrawCall(prog, vao, PicoGL.TRIANGLES);
         }
 
+        invariant(isFloatTexture(grid, 1));
         invariant(isFloatTexture(positions, 2));
 
         app
             .defaultDrawFramebuffer()
             .viewport(0, 0, app.width, app.height);
 
-        call.numElements = 6 * nodeCount;
+        call.numElements = 6 * grid.width * grid.height;
 
         call
             .uniform('invShape', [1/app.width, 1/app.height])
+            .texture('grid', grid)
             .texture('positions', positions)
             .draw();
     };

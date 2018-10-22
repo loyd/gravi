@@ -11,6 +11,7 @@ export const nearestPowerOfTwo = x => 2 ** Math.max(Math.ceil(Math.log2(x)), 1);
 export const nearestPowerOfFour = x => 4 ** Math.max(Math.ceil(log4(x)), 1);
 
 const FLOAT_FORMATS_BY_ITEM_SIZE = {
+    1: [PicoGL.RED,  PicoGL.R32F],
     2: [PicoGL.RG,   PicoGL.RG32F],
     3: [PicoGL.RGB,  PicoGL.RGB32F],
     4: [PicoGL.RGBA, PicoGL.RGBA32F],
@@ -61,3 +62,12 @@ export function invariant(expr) {
         throw error;
     }
 }
+
+export const pick = (obj, props) => props.reduce(
+    (result, prop) => {
+        if (prop in obj) {
+            result[prop] = obj[prop];
+        }
+        return result;
+    }
+, {});
