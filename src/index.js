@@ -146,6 +146,8 @@ export class Graph {
             this._running = true;
             this._schedule();
         }
+
+        return this;
     }
 
     step() {
@@ -155,10 +157,14 @@ export class Graph {
         }
 
         this._turn();
+
+        return this;
     }
 
     halt() {
         this._running = false;
+
+        return this;
     }
 
     _schedule() {
