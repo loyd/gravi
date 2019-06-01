@@ -5,7 +5,7 @@ layout(location = 0) in vec2 corner;
 uniform vec2 invShape;
 uniform sampler2D positions;
 
-const float SIZE = 10.;
+const float SIZE = 5.;
 
 void main() {
     int idx = gl_VertexID / 6;
