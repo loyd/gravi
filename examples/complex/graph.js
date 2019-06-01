@@ -13,25 +13,66 @@ function grabNum(item) {
     return num;
 }
 
-function generateGraph(nodeCount, edgeCount) {
-    const nodes = [];
+const generators = {
+    random(nodeCount, edgeCount) {
+        const nodes = [];
 
-    for (let i = 0; i < nodeCount; ++i) {
-        nodes.push({});
-    }
-
-    const edges = [];
-
-    for (let i = 0; i < edgeCount; ++i) {
-        const source = Math.random() * nodeCount | 0;
-        const target = Math.random() * nodeCount | 0;
-
-        if (source !== target) {
-            edges.push({source, target});
+        for (let i = 0; i < nodeCount; ++i) {
+            nodes.push({});
         }
-    }
 
-    return {nodes, edges};
+        const edges = [];
+
+        for (let i = 0; i < edgeCount; ++i) {
+            const source = Math.random() * nodeCount | 0;
+            const target = Math.random() * nodeCount | 0;
+
+            if (source !== target) {
+                edges.push({source, target});
+            }
+        }
+
+        return {nodes, edges};
+    },
+    tree(nodeCount) {
+        const n = 5;
+
+        const nodes = [];
+        const edges = [];
+
+        const count = Math.pow(2, n);
+
+        nodes.push({name: '1'});
+
+        for (let level = 1; level < count; ++level) {
+            const root = String(level);
+            const left = String(level * 2);
+            const right = String(level * 2 + 1);
+
+            nodes.push({name: left});
+            nodes.push({name: right});
+            edges.push({source: root, target: left});
+            edges.push({source: root, target: right});
+        }
+
+        return {nodes, edges};
+    },
+    complete(nodeCount) {
+        const nodes = [];
+        const edges = [];
+
+        for (let i = 0; i < nodeCount; ++i) {
+            nodes.push({});
+
+            for (let j = 0; j < nodeCount; ++j) {
+                if (i !== j) {
+                    edges.push({source: i, target: j});
+                }
+            }
+        }
+
+        return {nodes, edges};
+    },
 }
 
 function run() {
@@ -40,9 +81,11 @@ function run() {
         canvas.width = canvas.width;
     }
 
+    const kind = form.kind.value;
+
     const nodeCount = grabNum(form.nodeCount);
     const edgeCount = grabNum(form.edgeCount);
-    const {nodes, edges} = generateGraph(nodeCount, edgeCount);
+    const {nodes, edges} = generators[kind](nodeCount, edgeCount);
 
     graph = new Graph(canvas)
         .configure({
