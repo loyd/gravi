@@ -12,6 +12,8 @@ import drawLabels from './drawLabels';
 
 import {createFloatTexture, nearestPowerOfTwo, nearestPowerOfFour, pick} from './utils';
 
+const TARGET_FRAME_DURATION = 1000/30; // [ms]
+
 export class Graph {
     constructor(canvas) {
         const app = this._app = PicoGL.createApp(canvas);
@@ -46,6 +48,7 @@ export class Graph {
         this._shouldUpdate = false;
         this._shouldDraw = true;
         this._shouldDrawLabels = false;
+        this._stepsPerSchedule = 1;
 
         this._viewport = [-app.width/2, -app.height/2, app.width, app.height];
 
@@ -172,9 +175,22 @@ export class Graph {
             return;
         }
 
+        const start = Date.now();
+
         window.requestAnimationFrame(_ => {
-            this.step();
+            for (let i = 0; i < this._stepsPerSchedule; ++i) {
+                this.step();
+            }
+
             this._schedule();
+
+            const spent = Date.now() - start;
+
+            if (spent <= TARGET_FRAME_DURATION - 5) {
+                ++this._stepsPerSchedule;
+            } else if (spent >= TARGET_FRAME_DURATION + 5) {
+                this._stepsPerSchedule = Math.max(this._stepsPerSchedule - 1, 1);
+            }
         });
     }
 
