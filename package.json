@@ -13,6 +13,7 @@
     "devDependencies": {
         "@babel/core": "^7.0.0-beta.34",
         "@babel/preset-env": "^7.0.0-beta.34",
+        "gh-pages": "^2.0.1",
         "jasmine-core": "^2.8.0",
         "karma": "^1.7.1",
         "karma-chrome-launcher": "^2.2.0",
@@ -33,6 +34,7 @@
         "build": "TARGET=dev rollup -c",
         "test": "TARGET=test rollup -c && karma start",
         "coverage": "TARGET=cov rollup -c && karma start --reporters coverage",
-        "clean": "rm -rf dist/ coverage/"
+        "deploy": "mkdir -p pages && cp -r examples dist pages && gh-pages -d pages",
+        "clean": "rm -rf dist/ coverage/ pages/"
     }
 }
