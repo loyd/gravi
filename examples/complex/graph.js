@@ -29,18 +29,17 @@ const generators = {
 
             if (source !== target) {
                 edges.push({source, target});
+                edges.push({source: target, target: source});
             }
         }
 
         return {nodes, edges};
     },
     tree(nodeCount) {
-        const n = 5;
-
         const nodes = [];
         const edges = [];
 
-        const count = Math.pow(2, n);
+        const count = Math.pow(2, Math.ceil(Math.log2(nodeCount)));
 
         nodes.push({name: '1'});
 
@@ -52,7 +51,9 @@ const generators = {
             nodes.push({name: left});
             nodes.push({name: right});
             edges.push({source: root, target: left});
+            edges.push({source: left, target: root});
             edges.push({source: root, target: right});
+            edges.push({source: right, target: root});
         }
 
         return {nodes, edges};

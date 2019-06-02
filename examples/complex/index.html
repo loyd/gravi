@@ -31,18 +31,18 @@
 <form id="control" onsubmit="tryRun(); return false">
     <label>kind <select name="kind">
         <option value="random">Random</option>
-        <option value="tree">Tree</option>
-        <option value="complete" selected>Complete</option>
+        <option value="tree" selected>Tree</option>
+        <option value="complete">Complete</option>
     </select></label>
-    <label>nodeCount <input name="nodeCount" type="number" min=1 value=15 /></label>
-    <label>edgeCount <input name="edgeCount" type="number" min=0 value=15 /></label>
-    <label>deltaT <input name="deltaT" type="number" min=0.01 step=0.01 value=1 /></label>
-    <label>springCoef <input name="springCoef" type="number" min=0.01 step=0.01 value=10 /></label>
-    <label>springLength <input name="springLength" type="number" min=1 value=100 /></label>
-    <label>repulseCoef <input name="repulseCoef" type="number" min=0.1 step=0.1 value=1000 /></label>
+    <label>nodeCount <input name="nodeCount" type="number" min=1 value=1000 /></label>
+    <label>edgeCount <input name="edgeCount" type="number" min=0 value=500 /></label>
+    <label>deltaT <input name="deltaT" type="number" min=0.01 step=0.01 value=0.4 /></label>
+    <label>springCoef <input name="springCoef" type="number" min=0.01 step=0.01 value=25 /></label>
+    <label>springLength <input name="springLength" type="number" min=1 value=15 /></label>
+    <label>repulseCoef <input name="repulseCoef" type="number" min=0.1 step=0.1 value=3000 /></label>
     <label>theta <input name="theta" type="number" min=0.01 step=0.01 value=0.8 /></label>
     <label>dragCoef <input name="dragCoef" type="number" min=0.01 step=0.01 value=5 /></label>
-    <label>gravityCoef <input name="gravityCoef" type="number" min=0.01 step=0.01 value=2 /></label>
+    <label>gravityCoef <input name="gravityCoef" type="number" min=0.01 step=0.01 value=10 /></label>
     <label>drawLabels <input name="drawLabels" type="checkbox" /></label>
 
     <input type="submit" value="Run" />
