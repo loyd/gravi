@@ -54,6 +54,9 @@ vec2 calcSpringForce(int idx, float weight) {
 
     float diff = 1. - kLength * inversesqrt(dist2);
 
+    // TODO: we need it?
+    diff = max(diff, 0.);
+
     return weight * delta * diff;
 }
 
